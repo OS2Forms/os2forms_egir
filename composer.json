@@ -1,0 +1,33 @@
+{
+  "name": "os2forms/os2forms_egir",
+  "type": "drupal-module",
+  "description": "Adds EGIR integration OS2forms med Forløb",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "license": "EUPL-1.2",
+  "repositories": {
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    },
+    "assets": {
+      "type": "composer",
+      "url": "https://asset-packagist.org"
+    }
+  },
+  "require": {
+    "drupal/keycloak": "^1.5"
+  },
+  "extra": {
+    "composer-exit-on-patch-failure": true,
+    "patchLevel": {
+      "test": "-p2"
+    },
+    "enable-patching": true,
+    "patcher": {
+      "force-reset": true
+    },
+    "patches": {
+    }
+  }
+}

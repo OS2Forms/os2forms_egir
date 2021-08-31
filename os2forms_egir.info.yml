@@ -1,0 +1,12 @@
+name: 'OS2forms EGIR integration'
+description: 'Adds EGIR integration OS2forms med Forløb.'
+package: OS2Forms
+type: module
+core: 8.x
+core_version_requirement: ^8 || ^9
+
+dependencies:
+  - os2forms_forloeb
+
+'interface translation project': os2forms_egir
+'interface translation server pattern': modules/contrib/os2forms_egir/translations/os2forms_egir.da.po
