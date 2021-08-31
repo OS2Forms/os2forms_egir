@@ -13,9 +13,7 @@ use Drupal\webform\Entity\WebformSubmission;
 function os2forms_egir_install() {
   $theme_list = [
     'claro',
-    'gin',
-    'bootstrap',
-    'custom_theme'
+    'gin'
   ];
 
   // Install themes
@@ -26,7 +24,7 @@ function os2forms_egir_install() {
 
   // Set default and admin themes
   $system_theme
-    ->set('default', 'custom_theme')
+    ->set('default', 'gin')
     ->set('admin', 'gin')
     ->save();
 }
