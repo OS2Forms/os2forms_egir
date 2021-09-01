@@ -6,6 +6,8 @@ core: 8.x
 core_version_requirement: ^8 || ^9
 
 dependencies:
+  - feeds_ex
+  - keycloak
   - os2forms_forloeb
 
 'interface translation project': os2forms_egir
