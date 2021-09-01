@@ -16,8 +16,8 @@
     }
   },
   "require": {
-    "drupal/feeds_ex": "^1.0@alpha",
-    "drupal/keycloak": "^1.5"
+    "drupal/keycloak": "^1.5",
+    "drupal/feeds_ex": "^1.0@alpha"
   },
   "extra": {
     "composer-exit-on-patch-failure": true,
