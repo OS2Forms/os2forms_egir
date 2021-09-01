@@ -16,6 +16,7 @@
     }
   },
   "require": {
+    "drupal/feeds_ex": "^1.0@alpha",
     "drupal/keycloak": "^1.5"
   },
   "extra": {
