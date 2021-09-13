@@ -11,7 +11,7 @@ use Drupal\webform\Entity\WebformSubmission;
  * Implements hook_install().
  * Set Gin as default and admin theme for application
  */
-function os2forms_egir_install_8001() {
+function os2forms_egir_install() {
   $theme_list = [
     'claro',
     'gin'
@@ -30,15 +30,6 @@ function os2forms_egir_install_8001() {
     ->save();
 }
 
-/**
- * Implements hook_install().
- * Set EGIR environment variables
- */
-function os2forms_egir_install_8002() {
-    Drupal::configFactory()->getEditable('gir_url.settings')->set('gir_url', getenv('GIR_URL'))->save();
-    Drupal::configFactory()->getEditable('externals_root.settings')->set('externals_root', getenv('EXTERNALS_ROOT'))->save();
-}
-
 use Drupal\maestro\Engine\MaestroEngine;
 
 /**
@@ -47,22 +38,24 @@ use Drupal\maestro\Engine\MaestroEngine;
  */
 
 function get_gir_url() {
-
-  $forloeb_configuration = \Drupal::config('os2forms_egir.settings');
-  $gir_url = $forloeb_configuration->get('gir_url');
+  $gir_url = getenv('GIR_URL');
+  if (!$gir_url) {
+      $forloeb_configuration = \Drupal::config('os2forms_egir.settings');
+      $gir_url = $forloeb_configuration->get('gir_url');
+  }
 
   return $gir_url;
 }
-
 
 function get_externals_parent() {
+  $externals_parent = getenv('GIR_URL');
+  if (!$externals_parent) {
+      $forloeb_configuration = \Drupal::config('os2forms_egir.settings');
+      $externals_parent = $forloeb_configuration->get('externals_root');
+  }
 
-  $forloeb_configuration = \Drupal::config('os2forms_egir.settings');
-  $gir_url = $forloeb_configuration->get('externals_root');
-
-  return $gir_url;
+  return $externals_parent;
 }
-
 
 /* Utility function for looking up the ID of a taxonomy term from the name. */
 
