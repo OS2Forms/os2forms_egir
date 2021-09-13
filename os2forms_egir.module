@@ -48,7 +48,7 @@ function get_gir_url() {
 }
 
 function get_externals_parent() {
-  $externals_parent = getenv('GIR_URL');
+  $externals_parent = getenv('GIR_EXTERNALS_ROOT');
   if (!$externals_parent) {
       $forloeb_configuration = \Drupal::config('os2forms_egir.settings');
       $externals_parent = $forloeb_configuration->get('externals_root');
