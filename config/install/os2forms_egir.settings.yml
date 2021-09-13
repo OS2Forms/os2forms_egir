@@ -1,2 +1,0 @@
-gir_url: getenv('GIR_URL')
-externals_root: getenv('EXTERNALS_ROOT')
