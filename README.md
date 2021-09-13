@@ -11,3 +11,9 @@ You can also install the module by using Drush:
     ```
     ./vendor/bin/drush en os2forms_egir
     ```
+
+Add the following environmental variables to .env file in your installation (ideally by building the environment with Docker Compose):
+    ```
+    GIR_URL=http://localhost:5001
+    GIR_EXTERNALS_ROOT=1e78e3a6-b999-2bff-981e-d46f5c37cce6    
+    ```
