@@ -2,17 +2,17 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.taxonomy_term.consultancy.field_user_key
-    - field.field.taxonomy_term.consultancy.field_uuid
-    - taxonomy.vocabulary.consultancy
+    - field.field.taxonomy_term.orgunit.field_user_key
+    - field.field.taxonomy_term.orgunit.field_uuid
+    - taxonomy.vocabulary.orgunit
   module:
     - feeds_ex
-    - os2forms_forloeb
+    - os2forms_egir
     - taxonomy
-id: consultancies
-label: Consultancies
-description: 'Import consultancies from GIR'
-help: "In order to import consultancies fro GIR, you must create a feed of this Feed Type and enter a feed URL like this:\r\n\r\n$GIR_TOPLEVEL_URL/service/ou/$EXTERNAL_UUID/children\r\n\r\nwhere $EXTERNAL_UUID is the \"top level\" UUID for the list of external companies."
+id: mo_org_units_to_taxonomy
+label: ' Org Units'
+description: 'Import Org Units from GIR'
+help: "In order to import organizational units from GIR, you must create a feed with this Feed Type and as the feed URL specify \r\n\r\n<gir-toplevel-url>/service/o/<org-uuid>/ou/\r\n\r\nThis will import all organizational units and make them available when creating new units or externals."
 import_period: 3600
 fetcher: keycloakauth
 fetcher_configuration:
@@ -24,7 +24,7 @@ fetcher_configuration:
 parser: jsonpath
 parser_configuration:
   context:
-    value: '$.*'
+    value: '$.items.*'
   sources:
     name:
       label: name
@@ -48,7 +48,7 @@ processor_configuration:
   expire: -1
   skip_hash_check: false
   values:
-    vid: consultancy
+    vid: orgunit
   owner_id: 0
   authorize: false
   owner_feed_author: false

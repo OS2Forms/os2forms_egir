@@ -2,15 +2,17 @@ langcode: en
 status: true
 dependencies:
   config:
-    - field.field.user.user.field_uuid
+    - field.field.taxonomy_term.cost_center.field_user_key
+    - field.field.taxonomy_term.cost_center.field_uuid
+    - taxonomy.vocabulary.cost_center
   module:
     - feeds_ex
-    - os2forms_forloeb
-    - user
-id: employees
-label: Employees
-description: 'Import GIR employees as users in EGIR/Drupal'
-help: 'You can import all employees in an organisation using /service/o/<org-uuid>/e/.'
+    - os2forms_egir
+    - taxonomy
+id: cost_centers
+label: 'Cost Centers'
+description: 'Import cost centers from GIR'
+help: "In order to import cost centers for GIR, you must create a feed of this Feed Type and enter a feed URL like this:\r\n\r\n<gir-toplevel-URL>/service/ou/<costcenters-uuid>/children\r\n\r\nwhere <costcenters-uuid> is the \"top level\" UUID for the list of cost centers."
 import_period: 3600
 fetcher: keycloakauth
 fetcher_configuration:
@@ -22,12 +24,15 @@ fetcher_configuration:
 parser: jsonpath
 parser_configuration:
   context:
-    value: '$.items.*'
+    value: '$.*'
   sources:
+    name:
+      label: name
+      value: name
     user_key:
       label: user_key
       value: user_key
-    field_uuid:
+    uuid:
       label: uuid
       value: uuid
   display_errors: false
@@ -35,18 +40,23 @@ parser_configuration:
     - auto
   debug_mode: false
   line_limit: 100
-processor: 'entity:user'
+processor: 'entity:taxonomy_term'
 processor_configuration:
   langcode: en
   update_existing: 2
   update_non_existent: _delete
   expire: -1
   skip_hash_check: false
+  values:
+    vid: cost_center
   owner_id: 0
-  values: {  }
   authorize: false
   owner_feed_author: false
 custom_sources:
+  name:
+    label: name
+    value: name
+    machine_name: name
   user_key:
     label: user_key
     value: user_key
@@ -55,25 +65,25 @@ custom_sources:
     label: uuid
     value: uuid
     machine_name: uuid
-  '':
-    label: ''
-    value: ''
-    machine_name: ''
-  field_uuid:
-    label: uuid
-    value: uuid
-    machine_name: field_uuid
 mappings:
   -
     target: name
     map:
+      value: name
+    unique: {  }
+    settings:
+      language: null
+  -
+    target: field_user_key
+    map:
       value: user_key
     unique: {  }
-    settings: {  }
+    settings:
+      language: null
   -
     target: field_uuid
     map:
-      value: field_uuid
+      value: uuid
     unique:
       value: '1'
     settings:

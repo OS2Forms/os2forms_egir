@@ -162,11 +162,6 @@ class EmployeeWebformHandler extends WebformHandlerBase {
         }
       }
     }
-    /*
-    \Drupal::logger('os2forms_egir')->notice(
-    'Engagement JSON: ' . json_encode($engagement_json)
-    );
-     */
 
     // Fill out the form.
     $webform_submission->setElementData('first_name', $employee_json['givenname']);

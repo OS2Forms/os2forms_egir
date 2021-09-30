@@ -1,5 +1,5 @@
-name: 'OS2forms EGIR integration'
-description: 'Adds EGIR integration OS2forms med Forløb.'
+name: 'OS2forms med Forløb Module'
+description: 'Adds a Maestro workflow engine and advanced workflow functionality to OS2forms.'
 package: OS2Forms
 type: module
 core: 8.x
@@ -8,7 +8,9 @@ core_version_requirement: ^8 || ^9
 dependencies:
   - feeds_ex
   - keycloak
-  - os2forms_forloeb
+  - os2forms_forloeb 
+  - composer-drupal-optimizations
+  - uuid
 
 'interface translation project': os2forms_egir
 'interface translation server pattern': modules/contrib/os2forms_egir/translations/os2forms_egir.da.po
