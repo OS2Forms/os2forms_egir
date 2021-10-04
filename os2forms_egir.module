@@ -24,7 +24,6 @@ function os2forms_egir_maestro_interactive_handlers() {
   ];
 }
 
-
 /**
  * Simple batch handler to display the result of calling an external URL.
  *
@@ -64,7 +63,6 @@ function os2forms_egir_show_url_results(array &$form, $queueID = 0, $obj = NULL)
   return $form;
 }
 
-
 /**
  * Implements hook_maestro_batch_handlers().
  *
@@ -83,7 +81,6 @@ function os2forms_egir_maestro_batch_handlers() {
     'os2forms_egir_gir_approver_is_initiator' => t('Batch function to compare approver and initiator of a submission'),
   ];
 }
-
 
 /**
  * Determine whether the initiator of a process is also the approver.
@@ -117,7 +114,20 @@ function os2forms_egir_gir_approver_is_initiator($processID, $queueID) {
  */
 function os2forms_egir_gir_change_org_unit($processID, $queueID) {
   // @todo Implement this.
-  return TRUE;
+  // Get ID for webform which spawned this process.
+  $sid = MaestroEngine::getEntityIdentiferByUniqueID($processID, 'submission');
+  if ($sid) {
+
+    $webform_submission = WebformSubmission::load($sid);
+    // cf.
+    // https://www.drupal.org/project/webform/issues/2911356#comment-12271553
+    $values = $webform_submission->getData();
+  }
+  else {
+    return FALSE;
+  }
+  var_dump($values);
+  throw new Exception("Error Processing Request", 1);
 }
 
 /**

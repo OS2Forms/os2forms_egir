@@ -9,20 +9,20 @@ dependencies:
     - user
 id: employees
 label: Employees
-description: 'Import GIR employees as users in EGIR/Drupal'
-help: 'You can import all employees in an organisation using /service/o/<org-uuid>/e/.'
+description: "Import GIR employees as users in EGIR/Drupal"
+help: "You can import all employees in an organisation using /service/o/<org-uuid>/e/."
 import_period: 3600
 fetcher: keycloakauth
 fetcher_configuration:
   auto_detect_feeds: 0
   use_pubsubhubbub: 0
   always_download: 0
-  fallback_hub: ''
-  request_timeout: '30'
+  fallback_hub: ""
+  request_timeout: "120"
 parser: jsonpath
 parser_configuration:
   context:
-    value: '$.items.*'
+    value: "$.items.*"
   sources:
     user_key:
       label: user_key
@@ -35,7 +35,7 @@ parser_configuration:
     - auto
   debug_mode: false
   line_limit: 100
-processor: 'entity:user'
+processor: "entity:user"
 processor_configuration:
   langcode: en
   update_existing: 2
@@ -43,7 +43,7 @@ processor_configuration:
   expire: -1
   skip_hash_check: false
   owner_id: 0
-  values: {  }
+  values: {}
   authorize: false
   owner_feed_author: false
 custom_sources:
@@ -55,26 +55,24 @@ custom_sources:
     label: uuid
     value: uuid
     machine_name: uuid
-  '':
-    label: ''
-    value: ''
-    machine_name: ''
+  "":
+    label: ""
+    value: ""
+    machine_name: ""
   field_uuid:
     label: uuid
     value: uuid
     machine_name: field_uuid
 mappings:
-  -
-    target: name
+  - target: name
     map:
       value: user_key
-    unique: {  }
-    settings: {  }
-  -
-    target: field_uuid
+    unique: {}
+    settings: {}
+  - target: field_uuid
     map:
       value: field_uuid
     unique:
-      value: '1'
+      value: "1"
     settings:
       language: null
