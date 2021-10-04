@@ -2,8 +2,9 @@ langcode: en
 status: open
 dependencies:
   module:
+    - maestro_webform
     - os2forms
-    - os2forms_forloeb
+    - os2forms_egir
     - webform_entity_print
 third_party_settings:
   os2forms:
@@ -30,27 +31,23 @@ weight: 0
 uid: 1
 template: false
 archive: false
-id: disable_external
-title: 'Disable External'
-description: 'Disable an external consultant by setting the end date.'
+id: change_external
+title: 'Change External'
+description: 'Update an entity for an external in GIR, along with the corresponding organizational&nbsp; identities.'
 category: GIR
 elements: |
-  search_for_external:
+  search_external:
     '#type': webform_wizard_page
     '#title': 'Search for External'
-    search:
-      '#type': fieldset
-      '#title': Search
-      external_employee:
-        '#type': entity_autocomplete
-        '#title': 'External Employee'
-        '#target_type': user
-        '#selection_handler': 'default:user'
-        '#selection_settings':
-          include_anonymous: false
-          filter:
-            type: _none
-        '#required': true
+    external_employee:
+      '#type': entity_autocomplete
+      '#title': 'External Employee'
+      '#target_type': user
+      '#selection_handler': 'default:user'
+      '#selection_settings':
+        include_anonymous: true
+        filter:
+          type: _none
   edit_external:
     '#type': webform_wizard_page
     '#title': 'Edit External'
@@ -59,44 +56,90 @@ elements: |
       '#title': 'Personal Data'
       first_name:
         '#type': textfield
-        '#disabled': true
         '#title': 'First Name'
       last_name:
         '#type': textfield
-        '#disabled': true
         '#title': 'Last Name'
       telephone_number:
         '#type': tel
         '#title': 'Telephone Number'
-        '#disabled': true
-        '#prepopulate': true
-      employment_data:
-        '#type': fieldset
-        '#title': 'Employment Data'
-        end_date:
-          '#type': date
-          '#title': 'Termination Date'
-          '#required': true
-          '#date_date_format': ''
-      approval_information:
-        '#type': fieldset
-        '#title': 'Approval Information'
-        time_limit:
-          '#type': date
-          '#title': 'Time Limit'
-          '#date_date_format': ''
-        justification:
-          '#type': textfield
-          '#title': Justification
-        approver:
-          '#type': entity_autocomplete
-          '#title': Approver
-          '#target_type': user
-          '#selection_handler': 'default:user'
-          '#selection_settings':
-            include_anonymous: false
-            filter:
-              type: _none
+      email_address:
+        '#type': email
+        '#title': 'Email Address'
+      consultancy:
+        '#type': entity_autocomplete
+        '#title': Consultancy
+        '#target_type': taxonomy_term
+        '#selection_handler': 'default:taxonomy_term'
+        '#selection_settings':
+          target_bundles:
+            consultancy: consultancy
+            orgunit: orgunit
+          sort:
+            field: name
+            direction: ASC
+          auto_create: false
+          auto_create_bundle: orgunit
+    employment_data:
+      '#type': fieldset
+      '#title': 'Employment Data'
+      cost_center:
+        '#type': entity_autocomplete
+        '#title': 'Cost Center'
+        '#target_type': taxonomy_term
+        '#selection_handler': 'default:taxonomy_term'
+        '#selection_settings':
+          target_bundles:
+            cost_center: cost_center
+            orgunit: orgunit
+          auto_create: false
+          auto_create_bundle: cost_center
+      consultant_type:
+        '#type': webform_term_select
+        '#title': 'Consultant Type'
+        '#vocabulary': consultant_type
+        '#breadcrumb_delimiter': ''
+      start_date:
+        '#type': date
+        '#title': 'Start date'
+        '#date_date_format': ''
+      end_date:
+        '#type': date
+        '#title': 'End date'
+        '#date_date_format': ''
+      organizational_unit:
+        '#type': entity_autocomplete
+        '#title': 'Organizational Unit'
+        '#multiple': true
+        '#target_type': taxonomy_term
+        '#selection_handler': 'default:taxonomy_term'
+        '#selection_settings':
+          target_bundles:
+            orgunit: orgunit
+          sort:
+            field: name
+            direction: ASC
+          auto_create: false
+          auto_create_bundle: orgunit
+    approval_information:
+      '#type': fieldset
+      '#title': 'Approval Information'
+      time_limit:
+        '#type': date
+        '#title': 'Time Limit'
+        '#date_date_format': ''
+      justification:
+        '#type': textfield
+        '#title': Justification
+      approver:
+        '#type': entity_autocomplete
+        '#title': Approver
+        '#target_type': user
+        '#selection_handler': 'default:user'
+        '#selection_settings':
+          include_anonymous: false
+          filter:
+            type: _none
 css: ''
 javascript: ''
 settings:
@@ -276,6 +319,18 @@ access:
     users: {  }
     permissions: {  }
 handlers:
+  spawn_maestro_workflow:
+    id: maestro
+    label: 'Spawn Maestro Workflow'
+    notes: ''
+    handler_id: spawn_maestro_workflow
+    status: true
+    conditions: {  }
+    weight: 0
+    settings:
+      maestro_template: change_external
+      maestro_message_success: ''
+      maestro_message_failure: ''
   load_employee:
     id: employee
     label: 'Load Employee'

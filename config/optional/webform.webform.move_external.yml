@@ -3,6 +3,7 @@ status: open
 dependencies:
   module:
     - os2forms
+    - os2forms_egir
     - webform_entity_print
 third_party_settings:
   os2forms:
@@ -29,73 +30,90 @@ weight: 0
 uid: 1
 template: false
 archive: false
-id: change_organizational_unit
-title: 'Change External Organizational Unit'
-description: 'Send a request for creating a new organizational unit and submit it for approval.'
+id: move_external
+title: 'Move External'
+description: 'Move an external consultant to another organizational unit.'
 category: GIR
 elements: |
-  search_for_unit:
+  find_external:
     '#type': webform_wizard_page
-    '#title': 'Search for Unit'
-    organizational_unit:
-      '#type': entity_autocomplete
-      '#title': 'Organizational Unit'
+    '#title': 'Find External'
+    search:
+      '#type': fieldset
+      '#title': Search
+      external_employee:
+        '#type': entity_autocomplete
+        '#title': 'External Employee'
+        '#target_type': user
+        '#selection_handler': 'default:user'
+        '#selection_settings':
+          include_anonymous: true
+          filter:
+            type: _none
+  move_external:
+    '#type': webform_wizard_page
+    '#title': 'Move External'
+    personal_data:
+      '#type': fieldset
+      '#title': 'Personal Data'
+      first_name:
+        '#type': textfield
+        '#title': 'First Name'
+      last_name:
+        '#type': textfield
+        '#title': 'Last Name'
+      consultancy:
+        '#type': webform_term_select
+        '#title': Consultancy
+        '#disabled': true
+        '#prepopulate': true
+        '#vocabulary': consultancies
+        '#breadcrumb_delimiter': ''
+      telephone_number:
+        '#type': tel
+        '#title': 'Telephone Number'
+        '#disabled': true
+        '#prepopulate': true
+    old_organizational_unit:
+      '#type': webform_entity_select
+      '#title': 'Old Organizational Unit'
       '#target_type': taxonomy_term
       '#selection_handler': 'default:taxonomy_term'
       '#selection_settings':
         target_bundles:
-          consultancy: consultancy
+          orgunit: orgunit
         sort:
           field: name
           direction: ASC
+    new_organizational_unit:
+      '#type': entity_autocomplete
+      '#title': 'New Organizational Unit'
+      '#target_type': taxonomy_term
+      '#selection_handler': 'default:taxonomy_term'
+      '#selection_settings':
+        target_bundles:
+          orgunit: orgunit
         auto_create: false
-        auto_create_bundle: consultancy
-  edit_unit:
-    '#type': webform_wizard_page
-    '#title': 'Edit Unit'
-    organizational_data:
+        auto_create_bundle: orgunit
+    approval_information:
       '#type': fieldset
-      '#title': 'Organizational Data'
-      name:
+      '#title': 'Approval Information'
+      time_limit:
+        '#type': date
+        '#title': 'Time Limit'
+        '#date_date_format': ''
+      justification:
         '#type': textfield
-        '#title': Name
-        '#required': true
-      owner:
+        '#title': Justification
+      approver:
         '#type': entity_autocomplete
-        '#title': Owner
+        '#title': Approver
         '#target_type': user
         '#selection_handler': 'default:user'
         '#selection_settings':
-          include_anonymous: false
+          include_anonymous: true
           filter:
             type: _none
-      start_date:
-        '#type': date
-        '#title': 'Start date'
-        '#date_date_format': ''
-      end_date:
-        '#type': date
-        '#title': 'End date'
-        '#date_date_format': ''
-      approval_information:
-        '#type': fieldset
-        '#title': 'Approval Information'
-        time_limit:
-          '#type': date
-          '#title': 'Time Limit'
-          '#date_date_format': ''
-        justification:
-          '#type': textfield
-          '#title': Justification
-        approver:
-          '#type': entity_autocomplete
-          '#title': Approver
-          '#target_type': user
-          '#selection_handler': 'default:user'
-          '#selection_settings':
-            include_anonymous: true
-            filter:
-              type: _none
 css: ''
 javascript: ''
 settings:
@@ -275,18 +293,13 @@ access:
     users: {  }
     permissions: {  }
 handlers:
-  load_organization_unit:
-    id: org_unit
-    label: 'Load Organization Unit'
+  load_employee:
+    id: employee
+    label: 'Load Employee'
     notes: ''
-    handler_id: load_organization_unit
+    handler_id: load_employee
     status: true
-    conditions:
-      enabled:
-        ':input[name="organizational_unit"]':
-          filled: true
-        ':input[name="name"]':
-          empty: true
+    conditions: {  }
     weight: 0
     settings: {  }
 variants: {  }
