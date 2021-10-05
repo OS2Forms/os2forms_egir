@@ -49,8 +49,9 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $org_unit_uuid . '/';
     $ou_json = GIRUtils::get_json_from_api($ou_path);
-    $owner_path = $ou_path . '/details/owner';
+    $owner_path = $ou_path . 'details/owner';
     $owner_json = GIRUtils::get_json_from_api($owner_path);
+
     // There is only one potential owner, and /details/owner returns a list.
     $owner_data = reset($owner_json);
     if ($owner_data) {
