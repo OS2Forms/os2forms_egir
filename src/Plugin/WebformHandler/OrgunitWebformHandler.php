@@ -58,15 +58,15 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $webform_submission->setElementData('end_date', $ou_json['validity']['to']);
 
     // This is relevant for "Move Many Externals".
-    // TODO: Detect that we need to do this to save performance when just editing org unit.
-
+    // @todo Detect that we need to do this to save performance when just
+    // editing org unit.
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
     $externals = GIRUtils::get_externals_for_org_unit($uuid);
 
     if ($externals) {
       $external_ids = [];
       foreach ($externals as $username => $e) {
-        // Get ID from username
+        // Get ID from username.
         $user = user_load_by_name($username);
         $external_ids[] = $user->id();
       }
@@ -74,4 +74,5 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     }
   }
+
 }
