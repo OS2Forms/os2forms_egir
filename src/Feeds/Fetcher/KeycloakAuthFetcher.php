@@ -16,7 +16,8 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\HttpFoundation\Response;
 use Drupal\feeds\FeedInterface;
-use Drupal\os2forms_egir\get_openid_auth_token;
+
+use Drupal\os2forms_egir\GIRUtils;
 
 /**
  * Defines an HTTP fetcher.
@@ -49,7 +50,10 @@ class KeycloakAuthFetcher extends HTTPFetcher {
     $sink = $this->fileSystem->tempnam('temporary://', 'feeds_http_fetcher');
     $sink = $this->fileSystem->realpath($sink);
 
-    $response = $this->get($feed->getSource(), $sink, $this->getCacheKey($feed), get_openid_auth_token());
+    $response = $this->get(
+        $feed->getSource(), $sink,
+        $this->getCacheKey($feed), GIRUtils::get_openid_auth_token()
+    );
     // @todo Handle redirects.
     // @codingStandardsIgnoreStart
     // $feed->setSource($response->getEffectiveUrl());

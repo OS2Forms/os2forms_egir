@@ -1,5 +1,7 @@
 <?php
 
+namespace Drupal\os2forms_egir;
+
 /**
  * @file
  * EGIR configuration.
