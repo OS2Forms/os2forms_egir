@@ -10,8 +10,8 @@ use Drupal\webform\Entity\WebformSubmission;
 use Drupal\user\Entity\User;
 use Ramsey\Uuid\Uuid;
 
-require 'EGIRConfig.php';
-require 'gir_utils.php';
+use Drupal\os2forms_egir\EGIRConfig;
+use Drupal\os2forms_egir\GIRUtils;
 
 /**
  * Handler that returns an Array of function names and help text.
@@ -180,7 +180,7 @@ function os2forms_egir_gir_create_org_unit($processID, $queueID) {
   $validity = ['from' => $start_date, 'to' => $end_date];
 
   // Owner data.
-  $owner_uuid = get_user_data($owner_id, 'field_uuid');
+  $owner_uuid = GIRUtils::get_user_data($owner_id, 'field_uuid');
   $owner_details = [
     'type' => 'owner',
     'owner' => ['uuid' => $owner_uuid],
@@ -199,9 +199,9 @@ function os2forms_egir_gir_create_org_unit($processID, $queueID) {
   ];
 
   $json_data = json_encode($ou_data);
-  forms_log()->notice('Org unit sent: <' . $json_data . '>');
+  GIRUtils::forms_log()->notice('Org unit sent: <' . $json_data . '>');
 
-  $resp = post_json_to_api('/service/ou/create', $json_data);
+  $resp = GIRUtils::post_json_to_api('/service/ou/create', $json_data);
 
   if ($resp->getStatusCode() === 201) {
     $url_status = 'Success';
@@ -260,9 +260,9 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
   $validity = ['from' => $start_date, 'to' => $end_date];
 
   // Get consultancy data MO UUIDs.
-  $consultancy_uuid = get_term_data($consultancy_id, 'field_uuid');
-  $consultant_type_uuid = get_term_data($consultant_type_id, 'field_uuid');
-  $cost_center_uuid = get_term_data($cost_center_id, 'field_uuid');
+  $consultancy_uuid = GIRUtils::get_term_data($consultancy_id, 'field_uuid');
+  $consultant_type_uuid = GIRUtils::get_term_data($consultant_type_id, 'field_uuid');
+  $cost_center_uuid = GIRUtils::get_term_data($cost_center_id, 'field_uuid');
 
   // Generate employment UUID.
   $employment_uuid = Uuid::uuid4()->toString();
@@ -311,7 +311,7 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
 
   // Remaining engagement associations.
   foreach ($org_units as $ou) {
-    $ou_uuid = get_term_data($ou, 'field_uuid');
+    $ou_uuid = GIRUtils::get_term_data($ou, 'field_uuid');
     array_push($details,
       [
         'type' => 'engagement_association',
@@ -331,11 +331,11 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
   ];
 
   $json_data = json_encode($external_data);
-  forms_log()->notice('External sent: <' . $json_data . '>');
+  GIRUtils::forms_log()->notice('External sent: <' . $json_data . '>');
 
   // Param ?force=true is required because we create engagements and
   // engagement associations, which are interdependent, at the same time.
-  $resp = post_json_to_api('/service/e/create?force=true', $json_data);
+  $resp = GIRUtils::post_json_to_api('/service/e/create?force=true', $json_data);
 
   if ($resp->getStatusCode() === 201) {
     $url_status = 'Success';

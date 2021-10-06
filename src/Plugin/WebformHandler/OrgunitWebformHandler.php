@@ -6,8 +6,7 @@ use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionInterface;
 use Drupal\Core\Form\FormStateInterface;
 
-use Drupal\os2forms_egir\get_json_from_api;
-use Drupal\os2forms_egir\get_externals_for_org_unit;
+use Drupal\os2forms_egir\GIRUtils;
 
 /**
  * Webform submission handler for loading org units.
@@ -51,7 +50,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $uuid . '/';
-    $ou_json = get_json_from_api($ou_path);
+    $ou_json = GIRUtils::get_json_from_api($ou_path);
 
     // Fill out the form.
     $webform_submission->setElementData('name', $ou_json['name']);
@@ -62,7 +61,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // TODO: Detect that we need to do this to save performance when just editing org unit.
 
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = get_externals_for_org_unit($uuid);
+    $externals = GIRUtils::get_externals_for_org_unit($uuid);
 
     if ($externals) {
       $external_ids = [];
