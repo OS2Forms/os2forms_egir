@@ -72,13 +72,13 @@ elements: |
             type: _none
       start_date:
         '#type': date
-        '#title': 'Start date'
+        '#title': 'Start date of requested change'
         '#required': true
         '#default_value': today
         '#date_date_format': ''
       end_date:
         '#type': date
-        '#title': 'End date'
+        '#title': 'End date of requested change'
         '#date_date_format': ''
     approval_information:
       '#type': fieldset
