@@ -298,7 +298,7 @@ handlers:
     status: true
     conditions:
       enabled:
-        ':input[name="organizational_unit"]':
+        ':input[name="organisational_unit"]':
           filled: true
         ':input[name="name"]':
           empty: true

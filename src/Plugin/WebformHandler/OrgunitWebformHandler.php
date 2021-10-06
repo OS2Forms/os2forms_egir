@@ -37,6 +37,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     $org_unit_id = $values['organisational_unit'];
     $org_unit_uuid = GIRUtils::get_term_data($org_unit_id, 'field_uuid');
+    GIRUtils::forms_log()->notice("Org unit UUID" . var_export($org_unit_uuid, TRUE));
 
     if (!$org_unit_uuid) {
       \Drupal::logger('os2forms_egir')->notice(
@@ -49,6 +50,8 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $org_unit_uuid . '/';
     $ou_json = GIRUtils::get_json_from_api($ou_path);
+
+    GIRUtils::forms_log()->notice("OU JSON:" . json_encode($ou_json));
     // Fill out the form.
     $webform_submission->setElementData('name', $ou_json['name']);
 
