@@ -35,7 +35,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     $values = $webform_submission->getData();
 
-    $org_unit_id = $values['organizational_unit'];
+    $org_unit_id = $values['organisational_unit'];
     $org_unit_uuid = get_term_data($org_unit_id, 'field_uuid');
 
     if (!$org_unit_uuid) {
@@ -49,19 +49,21 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $org_unit_uuid . '/';
     $ou_json = GIRUtils::get_json_from_api($ou_path);
+    // Fill out the form.
+    $webform_submission->setElementData('name', $ou_json['name']);
+
+    // Parse owner.
     $owner_path = $ou_path . 'details/owner';
     $owner_json = GIRUtils::get_json_from_api($owner_path);
 
-    // There is only one potential owner, and /details/owner returns a list.
+    // There is only one potential owner, and details/owner returns a list.
     $owner_data = reset($owner_json);
     if ($owner_data) {
       $owner_uuid = $owner_data["owner"]["uuid"];
       $owner_id = get_user_by_mo_id($owner_uuid);
+      // Insert owner into form.
       $webform_submission->setElementData('owner', $owner_id);
     }
-
-    // Fill out the form.
-    $webform_submission->setElementData('name', $ou_json['name']);
 
     // This is relevant for "Move Many Externals".
     // @todo Detect that we need to do this to save performance when just editing org unit.
