@@ -24,7 +24,6 @@ function os2forms_egir_maestro_interactive_handlers() {
   ];
 }
 
-
 /**
  * Simple batch handler to display the result of calling an external URL.
  *
@@ -64,7 +63,6 @@ function os2forms_egir_show_url_results(array &$form, $queueID = 0, $obj = NULL)
   return $form;
 }
 
-
 /**
  * Implements hook_maestro_batch_handlers().
  *
@@ -83,7 +81,6 @@ function os2forms_egir_maestro_batch_handlers() {
     'os2forms_egir_gir_approver_is_initiator' => t('Batch function to compare approver and initiator of a submission'),
   ];
 }
-
 
 /**
  * Determine whether the initiator of a process is also the approver.
@@ -180,7 +177,7 @@ function os2forms_egir_gir_create_org_unit($processID, $queueID) {
   $validity = ['from' => $start_date, 'to' => $end_date];
 
   // Owner data.
-  $owner_uuid = GIRUtils::get_user_data($owner_id, 'field_uuid');
+  $owner_uuid = GIRUtils::getUserData($owner_id, 'field_uuid');
   $owner_details = [
     'type' => 'owner',
     'owner' => ['uuid' => $owner_uuid],
@@ -199,9 +196,9 @@ function os2forms_egir_gir_create_org_unit($processID, $queueID) {
   ];
 
   $json_data = json_encode($ou_data);
-  GIRUtils::forms_log()->notice('Org unit sent: <' . $json_data . '>');
+  GIRUtils::formsLog()->notice('Org unit sent: <' . $json_data . '>');
 
-  $resp = GIRUtils::post_json_to_api('/service/ou/create', $json_data);
+  $resp = GIRUtils::postJsonToApi('/service/ou/create', $json_data);
 
   if ($resp->getStatusCode() === 201) {
     $url_status = 'Success';
@@ -260,9 +257,9 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
   $validity = ['from' => $start_date, 'to' => $end_date];
 
   // Get consultancy data MO UUIDs.
-  $consultancy_uuid = GIRUtils::get_term_data($consultancy_id, 'field_uuid');
-  $consultant_type_uuid = GIRUtils::get_term_data($consultant_type_id, 'field_uuid');
-  $cost_center_uuid = GIRUtils::get_term_data($cost_center_id, 'field_uuid');
+  $consultancy_uuid = GIRUtils::getTermData($consultancy_id, 'field_uuid');
+  $consultant_type_uuid = GIRUtils::getTermData($consultant_type_id, 'field_uuid');
+  $cost_center_uuid = GIRUtils::getTermData($cost_center_id, 'field_uuid');
 
   // Generate employment UUID.
   $employment_uuid = Uuid::uuid4()->toString();
@@ -311,7 +308,7 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
 
   // Remaining engagement associations.
   foreach ($org_units as $ou) {
-    $ou_uuid = GIRUtils::get_term_data($ou, 'field_uuid');
+    $ou_uuid = GIRUtils::getTermData($ou, 'field_uuid');
     array_push($details,
       [
         'type' => 'engagement_association',
@@ -331,11 +328,11 @@ function os2forms_egir_gir_create_external($processID, $queueID) {
   ];
 
   $json_data = json_encode($external_data);
-  GIRUtils::forms_log()->notice('External sent: <' . $json_data . '>');
+  GIRUtils::formsLog()->notice('External sent: <' . $json_data . '>');
 
   // Param ?force=true is required because we create engagements and
   // engagement associations, which are interdependent, at the same time.
-  $resp = GIRUtils::post_json_to_api('/service/e/create?force=true', $json_data);
+  $resp = GIRUtils::postJsonToApi('/service/e/create?force=true', $json_data);
 
   if ($resp->getStatusCode() === 201) {
     $url_status = 'Success';
