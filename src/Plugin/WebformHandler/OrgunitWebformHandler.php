@@ -35,7 +35,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     $values = $webform_submission->getData();
 
-    $org_unit_id = $values['organisational_unit'];
+    $org_unit_id = $values['organizational_unit'];
     $org_unit_uuid = GIRUtils::get_term_data($org_unit_id, 'field_uuid');
     GIRUtils::forms_log()->notice("Org unit UUID" . var_export($org_unit_uuid, TRUE));
 

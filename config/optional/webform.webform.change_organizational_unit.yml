@@ -30,16 +30,16 @@ uid: 1
 template: false
 archive: false
 id: change_organizational_unit
-title: "Change External Organisational Unit"
-description: "Send a request for updating a new organisational unit and submit it for approval."
+title: "Change External Organizational Unit"
+description: "Send a request for updating a new organizational unit and submit it for approval."
 category: GIR
 elements: |
   search_for_unit:
     '#type': webform_wizard_page
     '#title': 'Search for Unit'
-    organisational_unit:
+    organizational_unit:
       '#type': entity_autocomplete
-      '#title': 'Organisational Unit'
+      '#title': 'Organizational Unit'
       '#target_type': taxonomy_term
       '#selection_handler': 'default:taxonomy_term'
       '#selection_settings':
@@ -50,13 +50,12 @@ elements: |
           direction: ASC
         auto_create: false
         auto_create_bundle: consultancy
-      '#required': true
   edit_unit:
     '#type': webform_wizard_page
     '#title': 'Edit Unit'
     organizational_data:
       '#type': fieldset
-      '#title': 'Organisational Data'
+      '#title': 'Organizational Data'
       name:
         '#type': textfield
         '#title': Name
@@ -72,33 +71,31 @@ elements: |
             type: _none
       start_date:
         '#type': date
-        '#title': 'Start date of requested change'
-        '#required': true
-        '#default_value': today
+        '#title': 'Start date'
         '#date_date_format': ''
       end_date:
         '#type': date
-        '#title': 'End date of requested change'
+        '#title': 'End date'
         '#date_date_format': ''
-    approval_information:
-      '#type': fieldset
-      '#title': 'Approval Information'
-      time_limit:
-        '#type': date
-        '#title': 'Time Limit'
-        '#date_date_format': ''
-      justification:
-        '#type': textfield
-        '#title': Justification
-      approver:
-        '#type': entity_autocomplete
-        '#title': Approver
-        '#target_type': user
-        '#selection_handler': 'default:user'
-        '#selection_settings':
-          include_anonymous: true
-          filter:
-            type: _none
+      approval_information:
+        '#type': fieldset
+        '#title': 'Approval Information'
+        time_limit:
+          '#type': date
+          '#title': 'Time Limit'
+          '#date_date_format': ''
+        justification:
+          '#type': textfield
+          '#title': Justification
+        approver:
+          '#type': entity_autocomplete
+          '#title': Approver
+          '#target_type': user
+          '#selection_handler': 'default:user'
+          '#selection_settings':
+            include_anonymous: true
+            filter:
+              type: _none
 css: ""
 javascript: ""
 settings:
@@ -298,7 +295,7 @@ handlers:
     status: true
     conditions:
       enabled:
-        ':input[name="organisational_unit"]':
+        ':input[name="organizational_unit"]':
           filled: true
         ':input[name="name"]':
           empty: true
