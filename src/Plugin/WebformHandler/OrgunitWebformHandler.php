@@ -36,7 +36,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $values = $webform_submission->getData();
 
     $org_unit_id = $values['organisational_unit'];
-    $org_unit_uuid = get_term_data($org_unit_id, 'field_uuid');
+    $org_unit_uuid = GIRUtils::get_term_data($org_unit_id, 'field_uuid');
 
     if (!$org_unit_uuid) {
       \Drupal::logger('os2forms_egir')->notice(
@@ -60,7 +60,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $owner_data = reset($owner_json);
     if ($owner_data) {
       $owner_uuid = $owner_data["owner"]["uuid"];
-      $owner_id = get_user_by_mo_id($owner_uuid);
+      $owner_id = GIRUtils::get_user_by_mo_id($owner_uuid);
       // Insert owner into form.
       $webform_submission->setElementData('owner', $owner_id);
     }
@@ -68,7 +68,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // This is relevant for "Move Many Externals".
     // @todo Detect that we need to do this to save performance when just editing org unit.
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = GIRUtils::get_externals_for_org_unit($uuid);
+    $externals = GIRUtils::get_externals_for_org_unit($org_unit_uuid);
 
     if ($externals) {
       $external_ids = [];
