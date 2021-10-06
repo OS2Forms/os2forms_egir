@@ -51,6 +51,20 @@ class GIRUtils {
   }
 
   /**
+   * Get Drupal user ID by MO UUID.
+   */
+  public static function getUserByGirUuid($mo_uuid) {
+    $user_store = \Drupal::entityTypeManager()->getStorage('user');
+    $user_array = $user_store->loadByProperties(['field_uuid' => $mo_uuid]);
+    if ($user_array) {
+      return reset($user_array)->id();
+    }
+    else {
+      return NULL;
+    }
+  }
+
+  /**
    * Get JSON from specified GIR API path.
    */
   public static function getJsonFromApi($path) {
