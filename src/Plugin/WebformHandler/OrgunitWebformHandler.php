@@ -42,7 +42,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     if (!$uuid) {
       \Drupal::logger('os2forms_egir')->notice(
-        'No UUID found for org unit: ' . $orgUnit_id
+        'No UUID found for org unit: ' . $org_unit_id
       );
 
       return;
@@ -50,7 +50,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $uuid . '/';
-    $ou_json = GIRUtils::get_json_from_api($ou_path);
+    $ou_json = GIRUtils::getJsonFromApi($ou_path);
 
     // Fill out the form.
     $webform_submission->setElementData('name', $ou_json['name']);
@@ -61,7 +61,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // @todo Detect that we need to do this to save performance when just
     // editing org unit.
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = GIRUtils::get_externals_for_org_unit($uuid);
+    $externals = GIRUtils::getExternalsForOrgUnit($uuid);
 
     if ($externals) {
       $external_ids = [];

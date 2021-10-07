@@ -1,14 +1,6 @@
 <?php
 
-/**
- * @file
- * Utilities for EGIR.
- */
-
-
 namespace Drupal\os2forms_egir;
-
-use Drupal\os2forms_egir\EGIRConfig;
 
 use GuzzleHttp\Exception\BadResponseException;
 use Dotenv\Dotenv;
@@ -16,19 +8,22 @@ use Dotenv\Dotenv;
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->safeLoad();
 
+/**
+ * Utilities for GIR communication & EGIR form data.
+ */
 class GIRUtils {
 
   /**
    * Get logger.
    */
-  public static function forms_log() {
+  public static function formsLog() {
     return \Drupal::logger('os2forms_egir');
   }
 
   /**
    * Get user data by Drupal ID and field name.
    */
-  public static function get_user_data($user_id, $field_name) {
+  public static function getUserData($user_id, $field_name) {
     $user = \Drupal::entityTypeManager()->getStorage('user')->load($user_id);
     return $user->getTypedData()->get($field_name)->value;
   }
@@ -36,7 +31,7 @@ class GIRUtils {
   /**
    * Get taxonomy term data by Drupal ID and field name.
    */
-  public static function get_term_data($term_id, $field_name) {
+  public static function getTermData($term_id, $field_name) {
     $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($term_id);
     return $term->getTypedData()->get($field_name)->value;
   }
@@ -44,7 +39,7 @@ class GIRUtils {
   /**
    * Get term ID by name.
    */
-  public static function get_term_id_by_name($name) {
+  public static function getTermIdByName($name) {
 
     $properties = [];
     $properties['name'] = $name;
@@ -58,11 +53,11 @@ class GIRUtils {
   /**
    * Get JSON from specified GIR API path.
    */
-  public static function get_json_from_api($path) {
+  public static function getJsonFromApi($path) {
     $config = new EGIRConfig();
     $mo_url = $config->girUrl;
     $url = $mo_url . $path;
-    $auth_token = self::get_openid_auth_token();
+    $auth_token = self::getOpenIdToken();
 
     // Authenticate.
     $headers = [
@@ -85,7 +80,7 @@ class GIRUtils {
       return json_decode($response->getBody(), TRUE);
     }
     else {
-      self::forms_log()->notice('Call to URL' . $url . 'failed:' . $response->getBody());
+      self::formsLog()->notice('Call to URL' . $url . 'failed:' . $response->getBody());
       return "";
     }
   }
@@ -93,12 +88,12 @@ class GIRUtils {
   /**
    * Post data to the relevant path.
    */
-  public static function post_json_to_api($path, $data) {
+  public static function postJsonToApi($path, $data) {
     // Full API path.
     $config = new EGIRConfig();
     $url = $config->girUrl . $path;
     // Authentication headers.
-    $access_token = self::get_openid_auth_token();
+    $access_token = self::getOpenIdToken();
     $headers = [
       'Authorization' => 'Bearer ' . $access_token,
       'Accept' => 'application/json',
@@ -121,7 +116,7 @@ class GIRUtils {
   /**
    * Get OpenID authentication token from Keycloak.
    */
-  public static function get_openid_auth_token() {
+  public static function getOpenIdToken() {
     $keycloak_configuration = \Drupal::config('openid_connect.settings.keycloak');
 
     $keycloak_settings = $keycloak_configuration->get('settings');
@@ -160,10 +155,10 @@ class GIRUtils {
    *
    * NOTE: Do not recurse into children.
    */
-  public static function get_employees_for_org_unit($org_unit_uuid) {
+  public static function getEmployeesForOrgUnit($org_unit_uuid) {
     $engagement_path = "/service/ou/{$org_unit_uuid}/details/engagement?validity=present";
 
-    $engagements = self::get_json_from_api($engagement_path);
+    $engagements = self::getJsonFromApi($engagement_path);
     $employees = [];
 
     foreach ($engagements as $engagement) {
@@ -176,9 +171,9 @@ class GIRUtils {
   /**
    * Get all employments with engagements in the specified organisation unit.
    */
-  public static function get_externals_for_org_unit($org_unit_uuid) {
+  public static function getExternalsForOrgUnit($org_unit_uuid) {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
-    $engagement_associations = self::get_json_from_api($ea_path);
+    $engagement_associations = self::getJsonFromApi($ea_path);
 
     $externals = [];
 

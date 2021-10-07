@@ -1,2 +1,6 @@
 # Ignore IntelliJ
 .idea/*
+
+# Ignore composer.lock & vendor/
+composer.lock
+vendor/

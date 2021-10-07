@@ -59,7 +59,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     // Now get all the right data from MO.
     $employee_path = '/service/e/' . $uuid . '/';
 
-    $employee_json = GIRUtils::get_json_from_api($employee_path);
+    $employee_json = GIRUtils::getJsonFromApi($employee_path);
 
     if ($employee_json == "") {
       return;
@@ -70,7 +70,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     // Get details link and extract addresses etc.
     $details_path = $employee_path . 'details/';
 
-    $details_json = GIRUtils::get_json_from_api($details_path);
+    $details_json = GIRUtils::getJsonFromApi($details_path);
 
     if ($details_json == "") {
       return;
@@ -82,7 +82,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $telephone_number = "";
     if ($details_json['address']) {
       $address_path = "{$details_path}address?at={$today}";
-      $address_json = GIRUtils::get_json_from_api($address_path);
+      $address_json = GIRUtils::getJsonFromApi($address_path);
 
       foreach ($address_json as $address) {
 
@@ -110,7 +110,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     // Get org unit for current engagement from engagement details.
     if ($details_json['engagement']) {
       $engagement_path = "{$details_path}engagement?at={$today}";
-      $engagement_json = GIRUtils::get_json_from_api($engagement_path);
+      $engagement_json = GIRUtils::getJsonFromApi($engagement_path);
       // @todo Later, handle multiple engagements.
       $engagement = reset($engagement_json);
     }
@@ -118,10 +118,10 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     if ($engagement) {
       $consultancy_name = $engagement['org_unit']['name'];
 
-      $consultancy_id = GIRUtils::get_term_id_by_name($consultancy_name);
+      $consultancy_id = GIRUtils::getTermIdByName($consultancy_name);
 
       $consultant_type_name = $engagement['engagement_type']['name'];
-      $consultant_type_id = GIRUtils::get_term_id_by_name($consultant_type_name);
+      $consultant_type_id = GIRUtils::getTermIdByName($consultant_type_name);
 
       $start_date = $engagement['validity']['from'];
       $end_date = $engagement['validity']['to'];
@@ -133,7 +133,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
         '/api/v1/engagement_association' . '?engagement=' . $engagement_uuid .
         '&at=' . $today
       );
-      $ea_json = GIRUtils::get_json_from_api($ea_path);
+      $ea_json = GIRUtils::getJsonFromApi($ea_path);
 
       if ($ea_json) {
         // There might not be any.
@@ -146,7 +146,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
           ) {
             // This is the cost center.
             $cost_center_name = $ea['org_unit']['name'];
-            $cost_center_id = GIRUtils::get_term_id_by_name($cost_center_name);
+            $cost_center_id = GIRUtils::getTermIdByName($cost_center_name);
           }
           elseif (
             $ea['engagement_association_type']['user_key'] == "External"
@@ -155,7 +155,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
             // Note, we should really be handling those as an array
             // as there may be more than one. Similar for legal org.
             $org_unit_name = $ea['org_unit']['name'];
-            $organizational_unit_id = GIRUtils::get_term_id_by_name($org_unit_name);
+            $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
             $org_units[] = $organizational_unit_id;
           }
         }
