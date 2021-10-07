@@ -52,7 +52,7 @@ class KeycloakAuthFetcher extends HTTPFetcher {
 
     $response = $this->get(
         $feed->getSource(), $sink,
-        $this->getCacheKey($feed), GIRUtils::get_openid_auth_token()
+        $this->getCacheKey($feed), GIRUtils::getOpenIdToken()
     );
     // @todo Handle redirects.
     // @codingStandardsIgnoreStart
