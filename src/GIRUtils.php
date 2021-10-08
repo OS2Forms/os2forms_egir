@@ -145,7 +145,7 @@ class GIRUtils {
     $payload['client_id'] = $client_id;
     $payload['client_secret'] = $client_secret;
 
-    $json = json_encode($payload);
+    // $json = json_encode($payload);
     $response = \Drupal::httpClient()->request(
       'POST',
       $token_url,

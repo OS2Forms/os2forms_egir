@@ -48,9 +48,8 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $values = $webform_submission->getData();
 
     $employee_id = $values['external_employee'];
-    $employee_term = \Drupal::entityTypeManager()->getStorage('user')->load($employee_id);
 
-    $uuid = $employee_term->get('field_uuid')->value;
+    $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
 
     if (!$uuid) {
       return;
@@ -78,7 +77,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     // Get email and phone from address details.
     $email_address = "";
-    $mobile_number = "";
+    // $mobile_number = "";
     $telephone_number = "";
     if ($details_json['address']) {
       $address_path = "{$details_path}address?at={$today}";
@@ -87,7 +86,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       foreach ($address_json as $address) {
 
         if ($address['address_type']['name'] == 'Mobile') {
-          $mobile_number = $address['value'];
+          // $mobile_number = $address['value'];
         }
         elseif ($address['address_type']['name'] == 'Phone') {
           $telephone_number = $address['value'];
