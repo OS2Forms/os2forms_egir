@@ -3,10 +3,6 @@
 namespace Drupal\os2forms_egir;
 
 use GuzzleHttp\Exception\BadResponseException;
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->safeLoad();
 
 /**
  * Utilities for GIR communication & EGIR form data.
