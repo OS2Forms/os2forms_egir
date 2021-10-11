@@ -36,11 +36,9 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $values = $webform_submission->getData();
 
     $org_unit_id = $values['organizational_unit'];
-    $org_unit_term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($org_unit_id);
+    $org_unit_uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
 
-    $uuid = $org_unit_term->get('field_uuid')->value;
-
-    if (!$uuid) {
+    if (!$org_unit_uuid) {
       \Drupal::logger('os2forms_egir')->notice(
         'No UUID found for org unit: ' . $org_unit_id
       );
@@ -49,19 +47,30 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     }
 
     // Now get all the right data from MO.
-    $ou_path = '/service/ou/' . $uuid . '/';
+    $ou_path = '/service/ou/' . $org_unit_uuid . '/';
     $ou_json = GIRUtils::getJsonFromApi($ou_path);
 
     // Fill out the form.
     $webform_submission->setElementData('name', $ou_json['name']);
-    $webform_submission->setElementData('start_date', $ou_json['validity']['from']);
-    $webform_submission->setElementData('end_date', $ou_json['validity']['to']);
+
+    // Parse owner.
+    $owner_path = $ou_path . 'details/owner';
+    $owner_json = GIRUtils::getJsonFromApi($owner_path);
+
+    // There is only one potential owner, and details/owner returns a list.
+    $owner_data = reset($owner_json);
+    if ($owner_data) {
+      $owner_uuid = $owner_data["owner"]["uuid"];
+      $owner_id = GIRUtils::getUserByGirUuid($owner_uuid);
+      // Insert owner into form.
+      $webform_submission->setElementData('owner', $owner_id);
+    }
 
     // This is relevant for "Move Many Externals".
     // @todo Detect that we need to do this to save performance when just
     // editing org unit.
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = GIRUtils::getExternalsForOrgUnit($uuid);
+    $externals = GIRUtils::getExternalsForOrgUnit($org_unit_uuid);
 
     if ($externals) {
       $external_ids = [];
