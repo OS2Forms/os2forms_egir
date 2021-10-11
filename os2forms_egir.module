@@ -134,8 +134,6 @@ function os2forms_egir_gir_change_org_unit($processID, $queueID) {
   else {
     return FALSE;
   }
-  // Get config.
-  $config = new EGIRConfig();
 
   // Validity.
   $validity = ['from' => $start_date, 'to' => $end_date];
@@ -205,7 +203,54 @@ function os2forms_egir_gir_change_external($processID, $queueID) {
  * Disable org unit.
  */
 function os2forms_egir_gir_disable_org_unit($processID, $queueID) {
-  // @todo Implement this.
+  // Get ID for webform which spawned this process.
+  $sid = MaestroEngine::getEntityIdentiferByUniqueID($processID, 'submission');
+  if ($sid) {
+
+    $webform_submission = WebformSubmission::load($sid);
+    // cf.
+    // https://www.drupal.org/project/webform/issues/2911356#comment-12271553
+    $values = $webform_submission->getData();
+
+    // Termination data.
+    $name = $values['name'];
+    $org_unit_id = $values['organizational_unit'];
+    $end_date = $values['end_date'];
+  }
+  else {
+    return FALSE;
+  }
+
+  // We terminate *from* end_date *to* infinity.
+  // NB: This kind of validity payload is only possible as of MO ^2.0!
+  $validity = ['from' => $end_date, 'to' => NULL];
+  $org_unit_uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
+
+  $termination_data = [
+    'type' => 'org_unit',
+    'uuid' => $org_unit_uuid,
+    'validity' => $validity,
+  ];
+
+  $json_data = json_encode($termination_data);
+  GIRUtils::formsLog()->notice('Termination data sent: <' . $json_data . '>');
+
+  $resp = GIRUtils::postJsonToApi('/service/details/terminate', $json_data);
+
+  if ($resp->getStatusCode() === 200) {
+    $url_status = 'Success';
+    $url_body = 'Organisation unit ' . $name
+              . ' was successfully terminated from ' . $end_date;
+  }
+  else {
+    $url_status = 'Failed';
+    $err_msg = json_decode($resp->getBody(), TRUE)['description'] ?? 'No description';
+    $url_body = 'Unable to terminate organisation unit ' . $name . ': ' . $err_msg;
+  };
+
+  MaestroEngine::setProcessVariable('url_status', $url_status, $processID);
+  MaestroEngine::setProcessVariable('url_body', $url_body, $processID);
+
   return TRUE;
 }
 
