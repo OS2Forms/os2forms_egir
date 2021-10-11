@@ -137,7 +137,7 @@ tasks:
       webform_nodes_attached_variable: none
       redirect_to: taskconsole
       show_edit_form: 0
-    assigned: 'user:variable:initiator'
+    assigned: 'user:variable:approver'
     runonce: false
     handler: ''
     showindetail: true
