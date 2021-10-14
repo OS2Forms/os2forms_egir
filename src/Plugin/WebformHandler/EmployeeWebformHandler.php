@@ -5,7 +5,7 @@ namespace Drupal\os2forms_egir\Plugin\WebformHandler;
 use Drupal\webform\Plugin\WebformHandlerBase;
 use Drupal\webform\WebformSubmissionInterface;
 use Drupal\Core\Form\FormStateInterface;
-
+use Drupal\os2forms_egir\EGIRConfig;
 use Drupal\os2forms_egir\GIRUtils;
 
 /**
@@ -46,7 +46,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       'SUBMISSION: ' . json_encode($webform_submission)
     );
     $values = $webform_submission->getData();
-
+    $config = new EGIRConfig();
     $employee_id = $values['external_employee'];
 
     $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
@@ -75,8 +75,12 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       return;
     }
 
+    // Array for extra UUID information.
+    $extra_uuids = [];
+
     // Get email and phone from address details.
     $email_address = "";
+    $email_addr_uuid = "";
     // $mobile_number = "";
     $telephone_number = "";
     if ($details_json['address']) {
@@ -84,15 +88,16 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       $address_json = GIRUtils::getJsonFromApi($address_path);
 
       foreach ($address_json as $address) {
-
         if ($address['address_type']['name'] == 'Mobile') {
           // $mobile_number = $address['value'];
         }
-        elseif ($address['address_type']['name'] == 'Phone') {
+        elseif ($address['address_type']['uuid'] == $config->extPhoneType) {
           $telephone_number = $address['value'];
+          $extra_uuids['phone_addr_uuid'] = $address['uuid'];
         }
-        elseif ($address['address_type']['scope'] == 'EMAIL') {
+        elseif ($address['address_type']['uuid'] == $config->extEmailType) {
           $email_address = $address['value'];
+          $extra_uuids['email_addr_uuid'] = $address['uuid'];
         }
 
       }
@@ -101,9 +106,10 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $cost_center_id = "";
     $organizational_unit_id = "";
     $consultant_type_id = "";
-    $start_date = "";
-    $end_date = "";
+    // $start_date = "";
+    // $end_date = "";
     $engagement = [];
+    $engagement_uuid = "";
     $org_units = [];
 
     // Get org unit for current engagement from engagement details.
@@ -122,12 +128,12 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       $consultant_type_name = $engagement['engagement_type']['name'];
       $consultant_type_id = GIRUtils::getTermIdByName($consultant_type_name);
 
-      $start_date = $engagement['validity']['from'];
-      $end_date = $engagement['validity']['to'];
-
+      // $start_date = $engagement['validity']['from'];
+      // $end_date = $engagement['validity']['to'];
       // Now for the engagement associations.
       // This only makes sense if there is an engagement.
       $engagement_uuid = $engagement['uuid'];
+      $extra_uuids['engagement_uuid'] = $engagement_uuid;
       $ea_path = (
         '/api/v1/engagement_association' . '?engagement=' . $engagement_uuid .
         '&at=' . $today
@@ -146,13 +152,12 @@ class EmployeeWebformHandler extends WebformHandlerBase {
             // This is the cost center.
             $cost_center_name = $ea['org_unit']['name'];
             $cost_center_id = GIRUtils::getTermIdByName($cost_center_name);
+            $extra_uuids['cost_center_ea_uuid'] = $ea['uuid'];
           }
           elseif (
             $ea['engagement_association_type']['user_key'] == "External"
           ) {
             // This is the org unit where the external is working.
-            // Note, we should really be handling those as an array
-            // as there may be more than one. Similar for legal org.
             $org_unit_name = $ea['org_unit']['name'];
             $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
             $org_units[] = $organizational_unit_id;
@@ -175,15 +180,10 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     if ($consultant_type_id) {
       $webform_submission->setElementData('consultant_type', $consultant_type_id);
     }
-    if ($start_date) {
-      $webform_submission->setElementData('start_date', $start_date);
-    }
-    if ($end_date) {
-      $webform_submission->setElementData('end_date', $end_date);
-    }
     if ($org_units) {
       $webform_submission->setElementData('organizational_unit', $org_units);
     }
+    $webform_submission->setElementData('extra_uuids', json_encode($extra_uuids));
   }
 
 }
