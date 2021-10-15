@@ -330,19 +330,13 @@ function os2forms_egir_gir_disable_org_unit($processID, $queueID) {
 
   // We terminate *from* end_date *to* infinity.
   // NB: This kind of validity payload is only possible as of MO ^2.0!
-  $validity = ['from' => $end_date, 'to' => NULL];
+  $validity = ['validity' => ['from' => $end_date, 'to' => NULL]];
   $org_unit_uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
 
-  $termination_data = [
-    'type' => 'org_unit',
-    'uuid' => $org_unit_uuid,
-    'validity' => $validity,
-  ];
-
-  $json_data = json_encode($termination_data);
+  $json_data = json_encode($validity);
   GIRUtils::formsLog()->notice('Termination data sent: <' . $json_data . '>');
 
-  $resp = GIRUtils::postJsonToApi('/service/details/terminate', $json_data);
+  $resp = GIRUtils::postJsonToApi("/service/ou/{$org_unit_uuid}/terminate", $json_data);
 
   if ($resp->getStatusCode() === 200) {
     $url_status = 'Success';
@@ -365,7 +359,44 @@ function os2forms_egir_gir_disable_org_unit($processID, $queueID) {
  * Disable external.
  */
 function os2forms_egir_gir_disable_external($processID, $queueID) {
-  // @todo Implement this.
+  // Get ID for webform which spawned this process.
+  $sid = MaestroEngine::getEntityIdentiferByUniqueID($processID, 'submission');
+  if ($sid) {
+
+    $webform_submission = WebformSubmission::load($sid);
+    // cf.
+    // https://www.drupal.org/project/webform/issues/2911356#comment-12271553
+    $values = $webform_submission->getData();
+
+    // Termination data.
+    $external_id = $values['external_employee'];
+    $first_name = $values['first_name'];
+    $last_name = $values['last_name'];
+    $end_date = $values['end_date'];
+  }
+  else {
+    return FALSE;
+  }
+  $external_uuid = GIRUtils::getUserData($external_id, 'field_uuid');
+  // Unfortunately, terminating *from* end date *to* infinity is currently
+  // not possible from this endpoint. We use the old way.
+  $validity = ['validity' => ['to' => $end_date]];
+  $json_data = json_encode($validity);
+  $resp = GIRUtils::postJsonToApi("/service/e/{$external_uuid}/terminate", $json_data);
+
+  if ($resp->getStatusCode() === 200) {
+    $url_status = 'Success';
+    $url_body = "External employee {$first_name} {$last_name} was "
+              . 'successfully terminated.';
+  }
+  else {
+    $url_status = 'Failed';
+    $err_msg = json_decode($resp->getBody(), TRUE)['description'] ?? 'No description';
+    $url_body = "Unable to terminate external employee: {$err_msg}";
+  };
+
+  MaestroEngine::setProcessVariable('url_status', $url_status, $processID);
+  MaestroEngine::setProcessVariable('url_body', $url_body, $processID);
   return TRUE;
 }
 
