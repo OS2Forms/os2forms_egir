@@ -1,4 +1,4 @@
-# OS2forms EGIR Integration [![Build Status](https://travis-ci.com/OS2Forms/os2forms_egir.svg?branch=develop)](https://travis-ci.org/OS2Forms/os2forms_egir)
+# OS2forms EGIR Integration [![Build Status](https://app.travis-ci.com/OS2Forms/os2forms_egir.svg?branch=main)](https://app.travis-ci.com/OS2Forms/os2forms_egir)
 Adds an EGIR governance layer on top of OS2forms Forløb.
 
 ## Installing OS2forms 2.1 med Forløb
