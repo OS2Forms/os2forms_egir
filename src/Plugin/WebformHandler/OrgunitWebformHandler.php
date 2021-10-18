@@ -25,10 +25,6 @@ use Drupal\os2forms_egir\GIRUtils;
 class OrgunitWebformHandler extends WebformHandlerBase {
 
   /**
-   * {@inheritdoc}
-   */
-
-  /**
    * Function to be called after submitting the webform.
    */
   public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {

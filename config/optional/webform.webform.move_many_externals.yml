@@ -1,3 +1,4 @@
+uuid: 1332ce5c-9126-4d4f-93dd-650b5de6d277
 langcode: en
 status: open
 dependencies:
@@ -6,6 +7,7 @@ dependencies:
     - os2forms
     - os2forms_egir
     - webform_entity_print
+    - webform_revisions
 third_party_settings:
   os2forms:
     os2forms_nemid:
@@ -25,6 +27,8 @@ third_party_settings:
         enabled: false
         link_text: ''
         link_attributes: {  }
+  webform_revisions:
+    contentEntity_id: '1'
 open: null
 close: null
 weight: 0
@@ -69,17 +73,15 @@ elements: |
             orgunit: orgunit
           auto_create: false
           auto_create_bundle: orgunit
-    externals:
-      '#type': entity_autocomplete
-      '#title': Externals
-      '#multiple': true
-      '#description': 'Please remove the externals that you do NOT want to move from the list.'
-      '#target_type': user
-      '#selection_handler': 'default:user'
-      '#selection_settings':
-        include_anonymous: false
-        filter:
-          type: _none
+      externals:
+        '#type': webform_entity_checkboxes
+        '#title': Externals
+        '#target_type': user
+        '#selection_handler': 'default:user'
+        '#selection_settings':
+          include_anonymous: false
+          filter:
+            type: _none
     approval_information:
       '#type': fieldset
       '#title': 'Approval Information'
@@ -221,8 +223,8 @@ settings:
   entity_limit_total_interval: null
   entity_limit_user: null
   entity_limit_user_interval: null
-  purge: none
-  purge_days: null
+  purge: all
+  purge_days: 30
   results_disabled: false
   results_disabled_ignore: false
   results_customize: false
