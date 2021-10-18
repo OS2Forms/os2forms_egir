@@ -25,6 +25,32 @@ use Drupal\os2forms_egir\GIRUtils;
 class OrgunitWebformHandler extends WebformHandlerBase {
 
   /**
+   * {@inheritdoc}
+   */
+  public function alterForm(
+    array &$form,
+    FormStateInterface $form_state,
+    WebformSubmissionInterface $webform_submission
+  ) {
+
+    $values = $webform_submission->getData();
+
+    if (!array_key_exists('organizational_unit', $values)) {
+      return;
+    }
+    $org_unit_id = $values['organizational_unit'];
+
+    $uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
+
+    if (!$uuid) {
+      return;
+    }
+    if ($form['#webform_id'] == 'move_many_externals') {
+        GIRUtils::formsLog()->notice("Hello world!");
+    }
+  }
+
+  /**
    * Function to be called after submitting the webform.
    */
   public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
