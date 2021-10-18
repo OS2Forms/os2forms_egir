@@ -113,7 +113,7 @@ class KeycloakAuthFetcher extends HTTPFetcher {
     }
     catch (RequestException $e) {
       $args = ['%site' => $url, '%error' => $e->getMessage()];
-      throw new \RuntimeException($this->t('The feed from %site seems to be broken because of error "%error".', $args));
+      throw new \RuntimeException('The feed from %site seems to be broken because of error "%error".', $args);
     }
 
     if ($cache_key) {

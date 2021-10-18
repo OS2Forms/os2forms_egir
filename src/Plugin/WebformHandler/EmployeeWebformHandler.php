@@ -27,6 +27,71 @@ class EmployeeWebformHandler extends WebformHandlerBase {
   /**
    * {@inheritdoc}
    */
+  public function alterForm(
+    array &$form,
+    FormStateInterface $form_state,
+    WebformSubmissionInterface $webform_submission
+  ) {
+
+    $values = $webform_submission->getData();
+    if (!array_key_exists('external_employee', $values)) {
+      return;
+    }
+    $employee_id = $values['external_employee'];
+
+    $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
+
+    if (!$uuid) {
+      return;
+    }
+
+    if ($form['#webform_id'] == 'move_external') {
+      // Special handling of this form. @todo factor out things of general use.
+      $employee_path = '/service/e/' . $uuid . '/';
+      $details_path = $employee_path . 'details/';
+      $details_json = GIRUtils::getJsonFromApi($details_path);
+      $engagement = [];
+      $org_units = [];
+      $org_unit_options = [];
+
+      // Get org unit for current engagement from engagement details.
+      // Date for retrieving valid details.
+      $today = date("Y-m-d");
+      if ($details_json['engagement']) {
+        $engagement_path = "{$details_path}engagement?at={$today}";
+        $engagement_json = GIRUtils::getJsonFromApi($engagement_path);
+        // @todo Later, handle multiple engagements.
+        $engagement = reset($engagement_json);
+      }
+      if ($engagement) {
+        $engagement_uuid = $engagement['uuid'];
+        $ea_path = (
+          '/api/v1/engagement_association' . '?engagement=' . $engagement_uuid .
+          '&at=' . $today
+        );
+        $ea_json = GIRUtils::getJsonFromApi($ea_path);
+        if ($ea_json) {
+          // There might not be any.
+          foreach ($ea_json as $ea) {
+            if ($ea['engagement_association_type']['user_key'] == "External") {
+              // This is an org unit where the external is working.
+              $org_unit_name = $ea['org_unit']['name'];
+              $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
+              $org_units[] = $organizational_unit_id;
+              $org_unit_options[$organizational_unit_id] = $org_unit_name;
+            }
+          }
+        }
+      }
+      $form["elements"]["move_external"]["old_organizational_unit"]["#options"] = $org_unit_options;
+      // If user has no engagement associations of type "External", we disable
+      // the field -there will be nothing to move.
+      if (!$org_unit_options) {
+        $form["elements"]["move_external"]["old_organizational_unit"]["#disabled"] = TRUE;
+      }
+    }
+
+  }
 
   /**
    * Collect data for proper display in form.
@@ -34,17 +99,12 @@ class EmployeeWebformHandler extends WebformHandlerBase {
    * This function will be called when user has just entered the employee's
    *  initials, before any changes or editing are made.
    */
-  public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
+  public function submitForm(
+    array &$form,
+    FormStateInterface $form_state,
+    WebformSubmissionInterface $webform_submission
+  ) {
 
-    \Drupal::logger('os2forms_egir')->notice(
-      'FORM: ' . json_encode($form)
-    );
-    \Drupal::logger('os2forms_egir')->notice(
-      'FORM STATE: ' . json_encode($form_state)
-    );
-    \Drupal::logger('os2forms_egir')->notice(
-      'SUBMISSION: ' . json_encode($webform_submission)
-    );
     $values = $webform_submission->getData();
     $config = new EGIRConfig();
     $employee_id = $values['external_employee'];
@@ -80,7 +140,6 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     // Get email and phone from address details.
     $email_address = "";
-    $email_addr_uuid = "";
     // $mobile_number = "";
     $telephone_number = "";
     if ($details_json['address']) {
@@ -157,7 +216,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
           elseif (
             $ea['engagement_association_type']['user_key'] == "External"
           ) {
-            // This is the org unit where the external is working.
+            // This is an org unit where the external is working.
             $org_unit_name = $ea['org_unit']['name'];
             $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
             $org_units[] = $organizational_unit_id;
