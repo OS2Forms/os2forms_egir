@@ -47,7 +47,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     if ($form['#webform_id'] == 'move_external') {
       // Special handling of this form. @todo factor out things of general use.
-      $employee_path = '/service/e/' . $uuid . '/';
+      $employee_path = "/service/e/{$uuid}/";
       $details_path = $employee_path . 'details/';
       $details_json = GIRUtils::getJsonFromApi($details_path);
       $engagement = [];
@@ -66,8 +66,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       if ($engagement) {
         $engagement_uuid = $engagement['uuid'];
         $ea_path = (
-          '/api/v1/engagement_association' . '?engagement=' . $engagement_uuid .
-          '&at=' . $today
+          "/api/v1/engagement_association?engagement={$engagement_uuid}&at={$today}"
         );
         $ea_json = GIRUtils::getJsonFromApi($ea_path);
         if ($ea_json) {
