@@ -45,48 +45,30 @@ class EmployeeWebformHandler extends WebformHandlerBase {
       return;
     }
 
-    if ($form['#webform_id'] == 'move_external') {
-      // Special handling of this form. @todo factor out things of general use.
-      $employee_path = "/service/e/{$uuid}/";
-      $details_path = $employee_path . 'details/';
-      $details_json = GIRUtils::getJsonFromApi($details_path);
-      $engagement = [];
+    if ($form['#webform_id'] === 'move_external') {
+      // Special handling of this form.
+      $engagement = GIRUtils::getEngagement($uuid);
       $org_units = [];
       $org_unit_options = [];
 
-      // Get org unit for current engagement from engagement details.
-      // Date for retrieving valid details.
-      $today = date("Y-m-d");
-      if ($details_json['engagement']) {
-        $engagement_path = "{$details_path}engagement?at={$today}";
-        $engagement_json = GIRUtils::getJsonFromApi($engagement_path);
-        // @todo Later, handle multiple engagements.
-        $engagement = reset($engagement_json);
-      }
       if ($engagement) {
-        $engagement_uuid = $engagement['uuid'];
-        $ea_path = (
-          "/api/v1/engagement_association?engagement={$engagement_uuid}&at={$today}"
-        );
-        $ea_json = GIRUtils::getJsonFromApi($ea_path);
-        if ($ea_json) {
-          // There might not be any.
-          foreach ($ea_json as $ea) {
-            if ($ea['engagement_association_type']['user_key'] == "External") {
-              // This is an org unit where the external is working.
-              $org_unit_name = $ea['org_unit']['name'];
-              $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
-              $org_units[] = $organizational_unit_id;
-              $org_unit_options[$organizational_unit_id] = $org_unit_name;
-            }
+        $engagement_associations = GIRUtils::getEngagementAssociations($engagement['uuid']);
+
+        foreach ($engagement_associations as $ea) {
+          if ($ea['engagement_association_type']['user_key'] === 'External') {
+            // This is an org unit where the external is working.
+            $org_unit_name = $ea['org_unit']['name'];
+            $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
+            $org_units[] = $organizational_unit_id;
+            $org_unit_options[$organizational_unit_id] = $org_unit_name;
           }
         }
       }
-      $form["elements"]["move_external"]["old_organizational_unit"]["#options"] = $org_unit_options;
+      $form['elements']['move_external']['old_organizational_unit']['#options'] = $org_unit_options;
       // If user has no engagement associations of type "External", we disable
       // the field -there will be nothing to move.
       if (!$org_unit_options) {
-        $form["elements"]["move_external"]["old_organizational_unit"]["#disabled"] = TRUE;
+        $form['elements']['move_external']['old_organizational_unit']['#disabled'] = TRUE;
       }
     }
 
@@ -119,18 +101,18 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     $employee_json = GIRUtils::getJsonFromApi($employee_path);
 
-    if ($employee_json == "") {
+    if (!$employee_json) {
       return;
     }
 
     // Date for retrieving valid details.
-    $today = date("Y-m-d");
+    $today = date('Y-m-d');
     // Get details link and extract addresses etc.
     $details_path = $employee_path . 'details/';
 
     $details_json = GIRUtils::getJsonFromApi($details_path);
 
-    if ($details_json == "") {
+    if (!$details_json) {
       return;
     }
 
@@ -138,88 +120,63 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $extra_uuids = [];
 
     // Get email and phone from address details.
-    $email_address = "";
-    // $mobile_number = "";
-    $telephone_number = "";
+    $email_address = '';
+    $telephone_number = '';
     if ($details_json['address']) {
       $address_path = "{$details_path}address?at={$today}";
       $address_json = GIRUtils::getJsonFromApi($address_path);
 
       foreach ($address_json as $address) {
-        if ($address['address_type']['name'] == 'Mobile') {
+        if ($address['address_type']['name'] === 'Mobile') {
           // $mobile_number = $address['value'];
         }
-        elseif ($address['address_type']['uuid'] == $config->extPhoneType) {
+        elseif ($address['address_type']['uuid'] === $config->extPhoneType) {
           $telephone_number = $address['value'];
           $extra_uuids['phone_addr_uuid'] = $address['uuid'];
         }
-        elseif ($address['address_type']['uuid'] == $config->extEmailType) {
+        elseif ($address['address_type']['uuid'] === $config->extEmailType) {
           $email_address = $address['value'];
           $extra_uuids['email_addr_uuid'] = $address['uuid'];
         }
-
       }
     }
 
-    $cost_center_id = "";
-    $organizational_unit_id = "";
-    $consultant_type_id = "";
-    // $start_date = "";
-    // $end_date = "";
-    $engagement = [];
-    $engagement_uuid = "";
+    $cost_center_id = '';
+    $organizational_unit_id = '';
+    $consultant_type_id = '';
+    $engagement = GIRUtils::getEngagement($uuid);
     $org_units = [];
 
-    // Get org unit for current engagement from engagement details.
-    if ($details_json['engagement']) {
-      $engagement_path = "{$details_path}engagement?at={$today}";
-      $engagement_json = GIRUtils::getJsonFromApi($engagement_path);
-      // @todo Later, handle multiple engagements.
-      $engagement = reset($engagement_json);
-    }
-
     if ($engagement) {
+      $extra_uuids['engagement_uuid'] = $engagement['uuid'];
+
       $consultancy_name = $engagement['org_unit']['name'];
-
       $consultancy_id = GIRUtils::getTermIdByName($consultancy_name);
-
       $consultant_type_name = $engagement['engagement_type']['name'];
       $consultant_type_id = GIRUtils::getTermIdByName($consultant_type_name);
 
-      // $start_date = $engagement['validity']['from'];
-      // $end_date = $engagement['validity']['to'];
       // Now for the engagement associations.
-      // This only makes sense if there is an engagement.
-      $engagement_uuid = $engagement['uuid'];
-      $extra_uuids['engagement_uuid'] = $engagement_uuid;
-      $ea_path = (
-        '/api/v1/engagement_association' . '?engagement=' . $engagement_uuid .
-        '&at=' . $today
-      );
-      $ea_json = GIRUtils::getJsonFromApi($ea_path);
+      $engagement_associations = GIRUtils::getEngagementAssociations($engagement['uuid']);
 
-      if ($ea_json) {
-        // There might not be any.
-        foreach ($ea_json as $ea) {
-          if ($ea['engagement_association_type']['user_key'] == "Legal Company") {
-            // This is the placement in the legal organization.
-          }
-          elseif (
-            $ea['engagement_association_type']['user_key'] == "Cost Center"
-          ) {
-            // This is the cost center.
-            $cost_center_name = $ea['org_unit']['name'];
-            $cost_center_id = GIRUtils::getTermIdByName($cost_center_name);
-            $extra_uuids['cost_center_ea_uuid'] = $ea['uuid'];
-          }
-          elseif (
-            $ea['engagement_association_type']['user_key'] == "External"
-          ) {
-            // This is an org unit where the external is working.
-            $org_unit_name = $ea['org_unit']['name'];
-            $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
-            $org_units[] = $organizational_unit_id;
-          }
+      foreach ($engagement_associations as $ea) {
+        if ($ea['engagement_association_type']['user_key'] === 'Legal Company') {
+          // This is the placement in the legal organization.
+        }
+        elseif (
+          $ea['engagement_association_type']['user_key'] === 'Cost Center'
+        ) {
+          // This is the cost center.
+          $cost_center_name = $ea['org_unit']['name'];
+          $cost_center_id = GIRUtils::getTermIdByName($cost_center_name);
+          $extra_uuids['cost_center_ea_uuid'] = $ea['uuid'];
+        }
+        elseif (
+          $ea['engagement_association_type']['user_key'] === 'External'
+        ) {
+          // This is an org unit where the external is working.
+          $org_unit_name = $ea['org_unit']['name'];
+          $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
+          $org_units[] = $organizational_unit_id;
         }
       }
     }

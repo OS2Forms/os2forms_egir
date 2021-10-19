@@ -70,7 +70,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     // @todo Detect that we need to do this to save performance when just
     // editing org unit.
     $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = GIRUtils::getExternalsForOrgUnit($org_unit_uuid);
+    $externals = GIRUtils::getExternals($org_unit_uuid);
 
     if ($externals) {
       $external_ids = [];
