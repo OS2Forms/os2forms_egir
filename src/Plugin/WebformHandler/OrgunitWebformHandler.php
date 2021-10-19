@@ -33,7 +33,6 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     WebformSubmissionInterface $webform_submission
   ) {
 
-    GIRUtils::formsLog()->notice('ALTER: ' . json_encode($form));
     $values = $webform_submission->getData();
 
     if (!array_key_exists('organizational_unit', $values)) {
@@ -57,8 +56,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
           $user = user_load_by_name($username);
           $external_options[$user->id()] = $username;
         }
-        $form['elements']['move-externals']['externals']['#options'] = $external_options;
-
+        $form['elements']['move_externals']['origin_and_destination_units']['externals']['#options'] = $external_options;
       }
     }
   }
