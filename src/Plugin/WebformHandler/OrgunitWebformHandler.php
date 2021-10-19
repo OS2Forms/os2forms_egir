@@ -33,6 +33,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     WebformSubmissionInterface $webform_submission
   ) {
 
+    GIRUtils::formsLog()->notice('ALTER: ' . json_encode($form));
     $values = $webform_submission->getData();
 
     if (!array_key_exists('organizational_unit', $values)) {
@@ -46,7 +47,19 @@ class OrgunitWebformHandler extends WebformHandlerBase {
       return;
     }
     if ($form['#webform_id'] == 'move_many_externals') {
-        GIRUtils::formsLog()->notice("Hello world!");
+      $externals = GIRUtils::getExternals($uuid);
+      GIRUtils::formsLog()->notice('Externals: ' . json_encode($externals));
+
+      if ($externals) {
+        $external_options = [];
+        foreach ($externals as $username => $e) {
+          // Get ID from username.
+          $user = user_load_by_name($username);
+          $external_options[$user->id()] = $username;
+        }
+        $form['elements']['move-externals']['externals']['#options'] = $external_options;
+
+      }
     }
   }
 
@@ -61,9 +74,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $org_unit_uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
 
     if (!$org_unit_uuid) {
-      \Drupal::logger('os2forms_egir')->notice(
-        'No UUID found for org unit: ' . $org_unit_id
-      );
+      GIRUtils::formsLog()->notice("No UUID found for org unit: $org_unit_id");
 
       return;
     }
@@ -88,21 +99,8 @@ class OrgunitWebformHandler extends WebformHandlerBase {
       $webform_submission->setElementData('owner', $owner_id);
     }
 
-    // This is relevant for "Move Many Externals".
-    // @todo Detect that we need to do this to save performance when just
-    // editing org unit.
-    $webform_submission->setElementData('origin_unit', $ou_json['name']);
-    $externals = GIRUtils::getExternals($org_unit_uuid);
-
-    if ($externals) {
-      $external_ids = [];
-      foreach ($externals as $username => $e) {
-        // Get ID from username.
-        $user = user_load_by_name($username);
-        $external_ids[] = $user->id();
-      }
-      $webform_submission->setElementData('externals', $external_ids);
-
+    if ($form['#webform_id'] == 'move_many_externals') {
+      $webform_submission->setElementData('origin_unit', $ou_json['name']);
     }
   }
 
