@@ -86,7 +86,7 @@ class GIRUtils {
       $response = $e->getResponse();
     }
 
-    if ($response->getStatusCode() == 200) {
+    if ($response->getStatusCode() === 200) {
       return json_decode($response->getBody(), TRUE);
     }
     else {
@@ -149,7 +149,7 @@ class GIRUtils {
     );
     $status_code = $response->getStatusCode();
 
-    if ($status_code == 200) {
+    if ($status_code === 200) {
       $body = json_decode($response->getBody(), TRUE);
       $access_token = $body['access_token'];
 
@@ -165,14 +165,14 @@ class GIRUtils {
    *
    * NOTE: Do not recurse into children.
    */
-  public static function getEmployeesForOrgUnit($org_unit_uuid) {
+  public static function getEmployees($org_unit_uuid) {
     $engagement_path = "/service/ou/{$org_unit_uuid}/details/engagement?validity=present";
 
     $engagements = self::getJsonFromApi($engagement_path);
     $employees = [];
 
     foreach ($engagements as $engagement) {
-      $employees[$engagement['uuid']] = $engagement["person"];
+      $employees[$engagement['uuid']] = $engagement['person'];
     }
 
     return $employees;
@@ -181,19 +181,58 @@ class GIRUtils {
   /**
    * Get all employments with engagements in the specified organisation unit.
    */
-  public static function getExternalsForOrgUnit($org_unit_uuid) {
+  public static function getExternals($org_unit_uuid) {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
     $engagement_associations = self::getJsonFromApi($ea_path);
 
     $externals = [];
 
     foreach ($engagement_associations as $ea) {
-      if ($ea["engagement_association_type"]["user_key"] == "External") {
-        $externals[$ea["engagement"]["user_key"]] = $ea["engagement"]["person"];
+      if ($ea['engagement_association_type']['user_key'] === 'External') {
+        $externals[$ea['engagement']['user_key']] = $ea['engagement']['person'];
       }
     }
 
     return $externals;
+  }
+
+  /**
+   * Get the engagement (singular) for the given employee.
+   */
+  public static function getEngagement($employee_uuid) {
+    $employee_path = "/service/e/{$employee_uuid}/";
+    $details_path = $employee_path . 'details/';
+    $details_json = GIRUtils::getJsonFromApi($details_path);
+
+    // Get org unit for current engagement from engagement details.
+    // Date for retrieving valid details.
+    $today = date('Y-m-d');
+    if ($details_json['engagement']) {
+      $engagement_path = "{$details_path}engagement?at={$today}";
+      $engagement_json = self::getJsonFromApi($engagement_path);
+      // @todo Later, handle multiple engagements.
+      $engagement = reset($engagement_json);
+    }
+    return $engagement;
+  }
+
+  /**
+   * Get the engagement associations for the given engagement.
+   */
+  public static function getEngagementAssociations($engagement_uuid) {
+    $today = date('Y-m-d');
+    $ea_path = (
+      "/api/v1/engagement_association?engagement={$engagement_uuid}&at={$today}"
+    );
+
+    $ea_json = self::getJsonFromApi($ea_path);
+
+    if (!$ea_json) {
+      return [];
+    }
+    else {
+      return $ea_json;
+    }
   }
 
 }
