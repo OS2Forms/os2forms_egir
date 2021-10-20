@@ -1,4 +1,3 @@
-uuid: 69fb2bde-6383-4f71-a0ad-e4a310fddac0
 langcode: en
 status: open
 dependencies:
@@ -6,29 +5,11 @@ dependencies:
     - maestro_webform
     - os2forms
     - os2forms_egir
-    - webform_entity_print
-    - webform_revisions
 third_party_settings:
   os2forms:
     os2forms_nemid:
       webform_type: ''
       nemlogin_auto_redirect: 0
-  webform_entity_print:
-    template:
-      header: ''
-      footer: ''
-      css: ''
-    export_types:
-      pdf:
-        enabled: true
-        link_text: ''
-        link_attributes: {  }
-      word_docx:
-        enabled: false
-        link_text: ''
-        link_attributes: {  }
-  webform_revisions:
-    contentEntity_id: '1'
 open: null
 close: null
 weight: 0

@@ -43,8 +43,10 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     $uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
 
     if (!$uuid) {
+      // No GIR UUID available.
       return;
     }
+
     if ($form['#webform_id'] == 'move_many_externals') {
       $externals = GIRUtils::getExternals($uuid);
       GIRUtils::formsLog()->notice('Externals: ' . json_encode($externals));
@@ -73,7 +75,11 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     if (!$org_unit_uuid) {
       GIRUtils::formsLog()->notice("No UUID found for org unit: $org_unit_id");
+      return;
+    }
 
+    if (!empty($values['name'])) {
+      // Already filled, don't overwrite existing changes.
       return;
     }
 
