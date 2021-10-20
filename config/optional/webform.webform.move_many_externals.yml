@@ -5,26 +5,11 @@ dependencies:
     - maestro_webform
     - os2forms
     - os2forms_egir
-    - webform_entity_print
 third_party_settings:
   os2forms:
     os2forms_nemid:
       webform_type: ''
       nemlogin_auto_redirect: 0
-  webform_entity_print:
-    template:
-      header: ''
-      footer: ''
-      css: ''
-    export_types:
-      pdf:
-        enabled: true
-        link_text: ''
-        link_attributes: {  }
-      word_docx:
-        enabled: false
-        link_text: ''
-        link_attributes: {  }
 open: null
 close: null
 weight: 0
@@ -69,17 +54,17 @@ elements: |
             orgunit: orgunit
           auto_create: false
           auto_create_bundle: orgunit
-    externals:
-      '#type': entity_autocomplete
-      '#title': Externals
-      '#multiple': true
-      '#description': 'Please remove the externals that you do NOT want to move from the list.'
-      '#target_type': user
-      '#selection_handler': 'default:user'
-      '#selection_settings':
-        include_anonymous: false
-        filter:
-          type: _none
+      externals:
+        '#type': webform_entity_checkboxes
+        '#title': Externals
+        '#target_type': user
+        '#selection_handler': 'default:user'
+        '#selection_settings':
+          include_anonymous: false
+          filter:
+            type: role
+            role:
+              administrator: 0
     approval_information:
       '#type': fieldset
       '#title': 'Approval Information'
@@ -221,8 +206,8 @@ settings:
   entity_limit_total_interval: null
   entity_limit_user: null
   entity_limit_user_interval: null
-  purge: none
-  purge_days: null
+  purge: all
+  purge_days: 30
   results_disabled: false
   results_disabled_ignore: false
   results_customize: false
@@ -278,20 +263,6 @@ access:
     users: {  }
     permissions: {  }
 handlers:
-  load_organization_unit:
-    id: org_unit
-    label: 'Load Organization Unit'
-    notes: ''
-    handler_id: load_organization_unit
-    status: true
-    conditions:
-      enabled:
-        ':input[name="organizational_unit"]':
-          filled: true
-        ':input[name="origin_unit"]':
-          empty: true
-    weight: 0
-    settings: {  }
   spawn_maestro_workflow:
     id: maestro
     label: 'Spawn Maestro Workflow'
@@ -304,4 +275,13 @@ handlers:
       maestro_template: move_many_externals
       maestro_message_success: ''
       maestro_message_failure: ''
+  load_organization_unit:
+    id: org_unit
+    label: 'Load Organization Unit'
+    notes: ''
+    handler_id: load_organization_unit
+    status: true
+    conditions: {  }
+    weight: 0
+    settings: {  }
 variants: {  }

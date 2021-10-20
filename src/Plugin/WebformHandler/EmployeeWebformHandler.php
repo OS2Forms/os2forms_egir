@@ -93,6 +93,11 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
 
     if (!$uuid) {
+      // Not linked to any employee in GIR.
+      return;
+    }
+    if (!empty($values['first_name']) or !empty($values['last_name'])) {
+      // This form has already been filled, don't overwrite submission.
       return;
     }
 

@@ -185,8 +185,11 @@ class GIRUtils {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
     $engagement_associations = self::getJsonFromApi($ea_path);
 
-    $externals = [];
+    if (!$engagement_associations) {
+      return [];
+    }
 
+    $externals = [];
     foreach ($engagement_associations as $ea) {
       if ($ea['engagement_association_type']['user_key'] === 'External') {
         $externals[$ea['engagement']['user_key']] = $ea['engagement']['person'];
