@@ -64,14 +64,7 @@ elements: |
           filter:
             type: role
             role:
-              borger: borger
               administrator: 0
-              flow_designer: 0
-              forloeb_designer: 0
-              sagsbehandler: 0
-              medarbejder: 0
-              leder: 0
-              virksomhed: 0
     approval_information:
       '#type': fieldset
       '#title': 'Approval Information'
