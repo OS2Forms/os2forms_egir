@@ -16,7 +16,7 @@ class HelloWorldTest extends \Codeception\Test\Unit
     }
 
     // tests
-    public function testSomeFeature()
+    public function testHelloWorld()
     {
         $one = 1;
         $this->assertEquals($one, 1);
