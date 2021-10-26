@@ -29,15 +29,17 @@ class GIRUtilsTest extends \Codeception\Test\Unit
         $user->enforceIsNew();
           $user->setPassword('password');
           $user->setEmail('egir@example.com');
-          $user->setUsername('egir5');
+          $user->setUsername('user');
           $user->set("init", 'mail');
           $user->set("langcode", $language);
           $user->set("preferred_langcode", $language);
           $user->set("preferred_admin_langcode", $language);
           $user->activate();
           $user->save();
-      $name = $user->email;  // GIRUtils::getUserData('egir', 'name');
-      $this->assertEquals($name, '');
+      $name = GIRUtils::getUserData($user->id(), 'name');
+          $this->assertEquals($name, 'user');
+
+          $user->delete();
 
     }
 }
