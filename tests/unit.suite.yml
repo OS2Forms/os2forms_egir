@@ -7,4 +7,7 @@ modules:
     enabled:
         - Asserts
         - \Helper\Unit
+        - \Codeception\Module\Drupal8\Drupal8:
+            root: /opt/drupal/web
+            relative: no
     step_decorators: ~        
