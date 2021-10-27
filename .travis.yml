@@ -38,6 +38,6 @@ script:
 - eslint $DRUPAL_ROOT/modules/contrib/os2forms_egir
 - stylelint --aei $DRUPAL_ROOT/modules/contrib/os2forms_egir/**/*.css
 - drupal-check $DRUPAL_ROOT/modules/contrib/os2forms_egir
-- cd $PROJECT_PATH
-- codecept run unit
+# - cd $PROJECT_PATH
+# - codecept run unit
 
