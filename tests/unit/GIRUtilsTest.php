@@ -3,6 +3,11 @@
 use Drupal\user\Entity\User;
 use Drupal\taxonomy\Entity\Term;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+
 use Drupal\os2forms_egir\GIRUtils;
 
 
@@ -61,25 +66,27 @@ class GIRUtilsTest extends \Codeception\Test\Unit
 
     public function testGetTermIdByName()
     {
-      $term = Term::create(['name' => 'test_id', 'vid' => 'client']);
+      $term = Term::create(['name' => 'testid', 'vid' => 'client']);
       $term->save();
       $id = $term->id();
 
-      $storedId = GIRUtils::getTermIdByName('test_id');
+      $storedId = GIRUtils::getTermIdByName('testid');
 
       $this->assertEquals($id, $storedId);
+
+      $term->delete();
 
     }
 
     public function testGetUserByGirUuid()
     {
-      $uuid = 'a6207d6a-36ff-11ec-8c87-6763965e91e0';
+      $uuid = '598c225a-3728-11ec-a511-3341ab9aa960';
       // Create new user.
       $user = \Drupal\user\Entity\User::create();
       $user->enforceIsNew();
       $user->setPassword('password');
-      $user->setEmail('uuid_test@example.com');
-      $user->setUsername('uuid_test');
+      $user->setEmail('uid@example.com');
+      $user->setUsername('uid');
       $user->activate();
       $user->field_uuid = $uuid;
       $user->save();
@@ -87,6 +94,21 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $stored_user_id = GIRUtils::getUserByGirUuid($uuid);
 
       $this->assertEquals($stored_user_id, $user->id());
+
+      $user->delete();
+    }
+
+    public function testGetJsonFromApi()
+    {
+      $body = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
+      $mock = new MockHandler([new Response(200, [], $body),]);
+      $handler = HandlerStack::create($mock);
+      $this->mockHttp = new Client(['handler' => $handler]);
+      // $todo Mock the global HTTP client somehow.
+      // $response = GIRUtils::getJsonFromApi('/no/real/path');
+      $response = $body;
+
+      $this->assertEquals($response, $body);
     }
 
 }
