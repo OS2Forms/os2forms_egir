@@ -10,4 +10,7 @@ modules:
         - \Codeception\Module\Drupal8\Drupal8:
             root: ../../..
             relative: yes
+            # On Travis:
+            # root: /home/travis/build/OS2Forms/drupal/web
+            # relative: no
     step_decorators: ~        
