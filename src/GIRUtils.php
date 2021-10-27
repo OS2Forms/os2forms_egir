@@ -238,4 +238,31 @@ class GIRUtils {
     }
   }
 
+  /**
+   * Get move payloads for engagement associations from one org unit to another.
+   */
+  public static function getMoveData($engagement_uuid, $old_ou_uuid, $new_ou_uuid) {
+    $config = new EGIRConfig();
+    $today = date('Y-m-d');
+    // Array storing edit data payload.
+    $move_data = [];
+    $engagement_associations = GIRUtils::getEngagementAssociations($engagement_uuid);
+    foreach ($engagement_associations as $ea) {
+      $ea_type_uuid = $ea['engagement_association_type']['uuid'];
+      $ea_org_unit_uuid = $ea['org_unit']['uuid'];
+      if ($ea_type_uuid === $config->externalEA && $ea_org_unit_uuid === $old_ou_uuid) {
+        $move_data[] = [
+          'type' => 'engagement_association',
+          'uuid' => $ea['uuid'],
+          'data' => [
+            'org_unit' => ['uuid' => $new_ou_uuid],
+            'validity' => ['from' => $today, 'to' => NULL],
+          ],
+        ];
+      }
+    }
+
+    return $move_data;
+  }
+
 }
