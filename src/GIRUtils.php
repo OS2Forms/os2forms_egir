@@ -192,7 +192,7 @@ class GIRUtils {
     $externals = [];
     foreach ($engagement_associations as $ea) {
       if ($ea['engagement_association_type']['user_key'] === 'External') {
-        $externals[$ea['engagement']['user_key']] = $ea['engagement']['person'];
+        $externals[] = $ea['engagement']['person'];
       }
     }
 
