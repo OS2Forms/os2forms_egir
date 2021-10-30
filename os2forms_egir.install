@@ -13,8 +13,7 @@
 function os2forms_egir_install() {
   $theme_list = [
     'claro',
-    'gin',
-    'bootstrap',
+    'gin'
   ];
   // Install themes.
   \Drupal::service('theme_installer')->install($theme_list);
