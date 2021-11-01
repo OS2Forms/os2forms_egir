@@ -53,10 +53,10 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
       if ($externals) {
         $external_options = [];
-        foreach ($externals as $username => $e) {
-          // Get ID from username.
-          $user = user_load_by_name($username);
-          $external_options[$user->id()] = $username;
+        foreach ($externals as $external) {
+          // Get ID from GIR UUID.
+          $user = GIRUtils::getUserByGirUuid($external['uuid']);
+          $external_options[$user] = $external['name'];
         }
         $form['elements']['move_externals']['origin_and_destination_units']['externals']['#options'] = $external_options;
       }

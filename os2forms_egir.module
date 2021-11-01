@@ -638,10 +638,6 @@ function os2forms_egir_gir_move_external($processID, $queueID) {
   else {
     return FALSE;
   }
-  // Config.
-  $config = new EGIRConfig();
-  $today = date('Y-m-d');
-
   $engagement_uuid = $extra_uuids['engagement_uuid'];
   $old_ou_uuid = GIRUtils::getTermData($old_ou_id, 'field_uuid');
   $new_ou_uuid = GIRUtils::getTermData($new_ou_id, 'field_uuid');
@@ -660,7 +656,7 @@ function os2forms_egir_gir_move_external($processID, $queueID) {
   else {
     $url_status = 'Failed';
     $err_msg = json_decode($resp->getBody(), TRUE)['description'] ?? 'No description';
-    $url_body = "Unable to terminate external employee: {$err_msg}";
+    $url_body = "Unable to move external employee: {$err_msg}";
   };
 
   MaestroEngine::setProcessVariable('url_status', $url_status, $processID);
@@ -673,6 +669,58 @@ function os2forms_egir_gir_move_external($processID, $queueID) {
  * Move many externals.
  */
 function os2forms_egir_gir_move_many_externals($processID, $queueID) {
+  $sid = MaestroEngine::getEntityIdentiferByUniqueID($processID, 'submission');
+  if ($sid) {
+
+    $webform_submission = WebformSubmission::load($sid);
+    // cf.
+    // https://www.drupal.org/project/webform/issues/2911356#comment-12271553
+    $values = $webform_submission->getData();
+
+    // Org unit data.
+    $old_ou_id = $values['organizational_unit'];
+    $new_ou_id = $values['destination_unit'];
+
+    // Externals.
+    $externals = $values['externals'];
+  }
+  else {
+    return FALSE;
+  }
+
+  // Org unit UUIDs.
+  $old_ou_uuid = GIRUtils::getTermData($old_ou_id, 'field_uuid');
+  $new_ou_uuid = GIRUtils::getTermData($new_ou_id, 'field_uuid');
+
+  // Edit payload data.
+  $edit_data = [];
+  foreach ($externals as $external_id) {
+    $external_uuid = GIRUtils::getUserData($external_id, 'field_uuid');
+    $engagement_uuid = GIRUtils::getEngagement($external_uuid)['uuid'];
+    $move_data = GIRUtils::getMoveData($engagement_uuid, $old_ou_uuid, $new_ou_uuid);
+    // We need to flatten $move_data.
+    $edit_data[] = array_merge(...$move_data);
+  }
+
+  $json_data = json_encode($edit_data);
+  $json_log = var_export($json_data, TRUE);
+  GIRUtils::formsLog()->notice("Edit data sent: {$json_log}");
+
+  $resp = GIRUtils::postJsonToApi('/service/details/edit', $json_data);
+
+  if ($resp->getStatusCode() === 200) {
+    $url_status = 'Success';
+    $url_body = 'External employees successfully moved.';
+  }
+  else {
+    $url_status = 'Failed';
+    $err_msg = json_decode($resp->getBody(), TRUE)['description'] ?? 'No description';
+    $url_body = "Unable to move external employees: {$err_msg}";
+  };
+
+  MaestroEngine::setProcessVariable('url_status', $url_status, $processID);
+  MaestroEngine::setProcessVariable('url_body', $url_body, $processID);
+
   return TRUE;
 }
 
