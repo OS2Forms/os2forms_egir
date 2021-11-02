@@ -13,13 +13,15 @@ use Drupal\os2forms_egir\GIRUtils;
 
 class GIRUtilsTest extends \Codeception\Test\Unit
 {
-    /**
-     * @var \UnitTester
-     */
-    protected $tester;
+  /**
+   * @var \UnitTester
+   */
+  protected $tester;
+  protected $utils;
     
     protected function _before()
     {
+      $this->$utils = new GIRUTils();
     }
 
     protected function _after()
@@ -28,7 +30,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
 
     // tests
     public function testFormsLog() {
-      $logger = GIRUtils::formsLog();
+      $logger = $this->$utils->formsLog();
       $this->assertTrue(method_exists($logger, 'notice'));
       $this->assertTrue(method_exists($logger, 'error'));
 
@@ -44,7 +46,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
         $user->setUsername('user');
         $user->activate();
         $user->save();
-      $name = GIRUtils::getUserData($user->id(), 'name');
+      $name = $this->$utils->getUserData($user->id(), 'name');
           $this->assertEquals($name, 'user');
 
           $user->delete();
@@ -56,7 +58,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $term = Term::create(['name' => 'egir_test', 'vid' => 'client']);
       $term->save();
 
-      $name = GIRUtils::getTermData($term->id(), 'name');
+      $name = $this->$utils->getTermData($term->id(), 'name');
 
       $this->assertEquals($name, 'egir_test');
 
@@ -70,7 +72,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $term->save();
       $id = $term->id();
 
-      $storedId = GIRUtils::getTermIdByName('testid');
+      $storedId = $this->$utils->getTermIdByName('testid');
 
       $this->assertEquals($id, $storedId);
 
@@ -91,7 +93,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $user->field_uuid = $uuid;
       $user->save();
 
-      $stored_user_id = GIRUtils::getUserByGirUuid($uuid);
+      $stored_user_id = $this->$utils->getUserByGirUuid($uuid);
 
       $this->assertEquals($stored_user_id, $user->id());
 

@@ -34,13 +34,14 @@ class OrgunitWebformHandler extends WebformHandlerBase {
   ) {
 
     $values = $webform_submission->getData();
+    $utils = new GIRUtils();
 
     if (!array_key_exists('organizational_unit', $values)) {
       return;
     }
     $org_unit_id = $values['organizational_unit'];
 
-    $uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
+    $uuid = $utils->getTermData($org_unit_id, 'field_uuid');
 
     if (!$uuid) {
       // No GIR UUID available.
@@ -48,8 +49,8 @@ class OrgunitWebformHandler extends WebformHandlerBase {
     }
 
     if ($form['#webform_id'] == 'move_many_externals') {
-      $externals = GIRUtils::getExternals($uuid);
-      GIRUtils::formsLog()->notice('Externals: ' . json_encode($externals));
+      $externals = $utils->getExternals($uuid);
+      $utils->formsLog()->notice('Externals: ' . json_encode($externals));
 
       if ($externals) {
         $external_options = [];
@@ -69,12 +70,13 @@ class OrgunitWebformHandler extends WebformHandlerBase {
   public function submitForm(array &$form, FormStateInterface $form_state, WebformSubmissionInterface $webform_submission) {
 
     $values = $webform_submission->getData();
+    $utils = new GIRUtils();
 
     $org_unit_id = $values['organizational_unit'];
-    $org_unit_uuid = GIRUtils::getTermData($org_unit_id, 'field_uuid');
+    $org_unit_uuid = $utils->getTermData($org_unit_id, 'field_uuid');
 
     if (!$org_unit_uuid) {
-      GIRUtils::formsLog()->notice("No UUID found for org unit: $org_unit_id");
+      $utils->formsLog()->notice("No UUID found for org unit: $org_unit_id");
       return;
     }
 
@@ -85,20 +87,20 @@ class OrgunitWebformHandler extends WebformHandlerBase {
 
     // Now get all the right data from MO.
     $ou_path = '/service/ou/' . $org_unit_uuid . '/';
-    $ou_json = GIRUtils::getJsonFromApi($ou_path);
+    $ou_json = $utils->getJsonFromApi($ou_path);
 
     // Fill out the form.
     $webform_submission->setElementData('name', $ou_json['name']);
 
     // Parse owner.
     $owner_path = $ou_path . 'details/owner';
-    $owner_json = GIRUtils::getJsonFromApi($owner_path);
+    $owner_json = $utils->getJsonFromApi($owner_path);
 
     // There is only one potential owner, and details/owner returns a list.
     $owner_data = reset($owner_json);
     if ($owner_data) {
       $owner_uuid = $owner_data["owner"]["uuid"];
-      $owner_id = GIRUtils::getUserByGirUuid($owner_uuid);
+      $owner_id = $utils->getUserByGirUuid($owner_uuid);
       // Insert owner into form.
       $webform_submission->setElementData('owner', $owner_id);
     }

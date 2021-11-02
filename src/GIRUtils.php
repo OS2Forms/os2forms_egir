@@ -20,11 +20,17 @@ class GIRUtils implements ContainerFactoryPluginInterface {
    */
   protected $httpClient;
 
+  /**
+   * Constructor.
+   */
   final public function __construct(array $configuration, $plugin_id, $plugin_definition, Client $httpClient) {
     $this->httpClient = $httpClient;
     parent::__construct($configuration, $plugin_id, $plugin_definition);
   }
 
+  /**
+   * Static create function.
+   */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
       $configuration,
@@ -37,14 +43,14 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get logger.
    */
-  public static function formsLog() {
+  public function formsLog() {
     return \Drupal::logger('os2forms_egir');
   }
 
   /**
    * Get user data by Drupal ID and field name.
    */
-  public static function getUserData($user_id, $field_name) {
+  public function getUserData($user_id, $field_name) {
     $user = \Drupal::entityTypeManager()->getStorage('user')->load($user_id);
     return $user->getTypedData()->get($field_name)->value;
   }
@@ -52,7 +58,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get taxonomy term data by Drupal ID and field name.
    */
-  public static function getTermData($term_id, $field_name) {
+  public function getTermData($term_id, $field_name) {
     $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->load($term_id);
     return $term->getTypedData()->get($field_name)->value;
   }
@@ -60,7 +66,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get term ID by name.
    */
-  public static function getTermIdByName($name) {
+  public function getTermIdByName($name) {
 
     $properties = [];
     $properties['name'] = $name;
@@ -74,7 +80,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get Drupal user ID by MO UUID.
    */
-  public static function getUserByGirUuid($mo_uuid) {
+  public function getUserByGirUuid($mo_uuid) {
     $user_store = \Drupal::entityTypeManager()->getStorage('user');
     $user_array = $user_store->loadByProperties(['field_uuid' => $mo_uuid]);
     if ($user_array) {
@@ -88,7 +94,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get JSON from specified GIR API path.
    */
-  public static function getJsonFromApi($path) {
+  public function getJsonFromApi($path) {
     $config = new EGIRConfig();
     $mo_url = $config->girUrl;
     $url = $mo_url . $path;
@@ -123,7 +129,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Post data to the relevant path.
    */
-  public static function postJsonToApi($path, $data) {
+  public function postJsonToApi($path, $data) {
     // Full API path.
     $config = new EGIRConfig();
     $url = $config->girUrl . $path;
@@ -151,7 +157,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get OpenID authentication token from Keycloak.
    */
-  public static function getOpenIdToken() {
+  public function getOpenIdToken() {
     $keycloak_configuration = \Drupal::config('openid_connect.settings.keycloak');
 
     $keycloak_settings = $keycloak_configuration->get('settings');
@@ -190,7 +196,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
    *
    * NOTE: Do not recurse into children.
    */
-  public static function getEmployees($org_unit_uuid) {
+  public function getEmployees($org_unit_uuid) {
     $engagement_path = "/service/ou/{$org_unit_uuid}/details/engagement?validity=present";
 
     $engagements = self::getJsonFromApi($engagement_path);
@@ -206,7 +212,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get all employments with engagements in the specified organisation unit.
    */
-  public static function getExternals($org_unit_uuid) {
+  public function getExternals($org_unit_uuid) {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
     $engagement_associations = self::getJsonFromApi($ea_path);
 
@@ -227,7 +233,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get the engagement (singular) for the given employee.
    */
-  public static function getEngagement($employee_uuid) {
+  public function getEngagement($employee_uuid) {
     $employee_path = "/service/e/{$employee_uuid}/";
     $details_path = $employee_path . 'details/';
     $details_json = GIRUtils::getJsonFromApi($details_path);
@@ -247,7 +253,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   /**
    * Get the engagement associations for the given engagement.
    */
-  public static function getEngagementAssociations($engagement_uuid) {
+  public function getEngagementAssociations($engagement_uuid) {
     $today = date('Y-m-d');
     $ea_path = (
       "/api/v1/engagement_association?engagement={$engagement_uuid}&at={$today}"
