@@ -2,12 +2,37 @@
 
 namespace Drupal\os2forms_egir;
 
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use GuzzleHttp\Client;
+
 use GuzzleHttp\Exception\BadResponseException;
 
 /**
  * Utilities for GIR communication & EGIR form data.
  */
-class GIRUtils {
+class GIRUtils implements ContainerFactoryPluginInterface {
+
+  /**
+   * The http service.
+   *
+   * @var \GuzzleHttp\Client
+   */
+  protected $httpClient;
+
+  final public function __construct(array $configuration, $plugin_id, $plugin_definition, Client $httpClient) {
+    $this->httpClient = $httpClient;
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+  }
+
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('http_client')
+    );
+  }
 
   /**
    * Get logger.
@@ -76,7 +101,7 @@ class GIRUtils {
     ];
 
     try {
-      $response = \Drupal::httpClient()->request(
+      $response = $this->httpClient()->request(
         'GET',
         $url,
         ['headers' => $headers]
@@ -111,7 +136,7 @@ class GIRUtils {
     ];
 
     try {
-      $response = \Drupal::httpClient()->request(
+      $response = $this->httpClient()->request(
         'POST',
         $url,
         ['body' => $data, 'headers' => $headers]
@@ -142,7 +167,7 @@ class GIRUtils {
     $payload['client_secret'] = $client_secret;
 
     // $json = json_encode($payload);
-    $response = \Drupal::httpClient()->request(
+    $response = $this->httpClient()->request(
       'POST',
       $token_url,
       ['form_params' => $payload]
