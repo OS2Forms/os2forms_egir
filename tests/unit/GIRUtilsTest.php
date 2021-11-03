@@ -138,11 +138,29 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       ]);
       $handler = HandlerStack::create($mock);
       $mockHttp = new Client(['handler' => $handler]);
-      $utils = new GIRUtils($mockHttp, TRUE);
+      $utils = new GIRUtils($mockHttp);
 
       $token = $utils->getOpenIdToken();
 
       $this->assertEquals($token, 'xyz');
 
+    }
+
+    public function testGetExternals()
+    {
+      // Get a functioning list of engagement associations somehow.
+      // Mock for the getJsonFromAPI call.
+      // Expect the correct externals to be extracted.
+      // @ todo Implement this.
+      $this->assertEquals(0, 0);
+    }
+
+    public function testGetEngagement()
+    {
+      // Supply list of details for the HTTP mock.
+      // Supply resulting engagement for the HTTP mock.
+      // Check the correct engagement is returned.
+      // @ todo Implement this.
+      $this->assertEquals(0, 0);
     }
 }

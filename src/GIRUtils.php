@@ -192,24 +192,6 @@ class GIRUtils {
 
   /**
    * Get all employments with engagements in the specified organisation unit.
-   *
-   * NOTE: Do not recurse into children.
-   */
-  public function getEmployees($org_unit_uuid) {
-    $engagement_path = "/service/ou/{$org_unit_uuid}/details/engagement?validity=present";
-
-    $engagements = $this->getJsonFromApi($engagement_path);
-    $employees = [];
-
-    foreach ($engagements as $engagement) {
-      $employees[$engagement['uuid']] = $engagement['person'];
-    }
-
-    return $employees;
-  }
-
-  /**
-   * Get all employments with engagements in the specified organisation unit.
    */
   public function getExternals($org_unit_uuid) {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
@@ -235,7 +217,7 @@ class GIRUtils {
   public function getEngagement($employee_uuid) {
     $employee_path = "/service/e/{$employee_uuid}/";
     $details_path = $employee_path . 'details/';
-    $details_json = GIRUtils::getJsonFromApi($details_path);
+    $details_json = $this->getJsonFromApi($details_path);
 
     // Get org unit for current engagement from engagement details.
     // Date for retrieving valid details.
@@ -276,7 +258,7 @@ class GIRUtils {
     $today = date('Y-m-d');
     // Array storing edit data payload.
     $move_data = [];
-    $engagement_associations = GIRUtils::getEngagementAssociations($engagement_uuid);
+    $engagement_associations = $this->getEngagementAssociations($engagement_uuid);
     foreach ($engagement_associations as $ea) {
       $ea_type_uuid = $ea['engagement_association_type']['uuid'];
       $ea_org_unit_uuid = $ea['org_unit']['uuid'];
