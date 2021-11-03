@@ -115,4 +115,18 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $this->assertEquals($response, json_decode($body, TRUE));
     }
 
+    public function testPostJsonToApi()
+    {
+      $data = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
+      $mock = new MockHandler([
+        new Response(201, [], '{}'),
+      ]);
+      $handler = HandlerStack::create($mock);
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp, FALSE);
+
+      $response = $utils->postJsonToApi('/some/path/', $data);
+
+      $this->assertEquals(json_encode($response), '{}');
+    }
 }
