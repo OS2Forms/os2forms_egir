@@ -108,7 +108,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       ]);
       $handler = HandlerStack::create($mock);
       $mockHttp = new Client(['handler' => $handler]);
-      $utils = new GIRUtils($mockHttp, false);
+      $utils = new GIRUtils($mockHttp, FALSE);
       
       $response = $utils->getJsonFromApi('/no/real/path');
 
@@ -128,5 +128,21 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $response = $utils->postJsonToApi('/some/path/', $data);
 
       $this->assertEquals(json_encode($response), '{}');
+    }
+
+    public function testGetOpenIdToken()
+    {
+      $body = json_encode([ 'access_token' => 'xyz' ]);
+      $mock = new MockHandler([
+        new Response(200, [], $body),
+      ]);
+      $handler = HandlerStack::create($mock);
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp, TRUE);
+
+      $token = $utils->getOpenIdToken();
+
+      $this->assertEquals($token, 'xyz');
+
     }
 }
