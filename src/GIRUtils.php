@@ -2,8 +2,6 @@
 
 namespace Drupal\os2forms_egir;
 
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use GuzzleHttp\Client;
 
 use GuzzleHttp\Exception\BadResponseException;
@@ -11,7 +9,7 @@ use GuzzleHttp\Exception\BadResponseException;
 /**
  * Utilities for GIR communication & EGIR form data.
  */
-class GIRUtils implements ContainerFactoryPluginInterface {
+class GIRUtils {
 
   /**
    * The http service.
@@ -21,23 +19,21 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   protected $httpClient;
 
   /**
-   * Constructor.
+   * Keycloak/OpenID auth on/off.
+   *
+   * @var bool
    */
-  final public function __construct(array $configuration, $plugin_id, $plugin_definition, Client $httpClient) {
-    $this->httpClient = $httpClient;
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-  }
+  protected $useAuth;
 
   /**
-   * Static create function.
+   * Constructor.
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('http_client')
-    );
+  public function __construct(Client $httpClient = NULL, $useAuth = TRUE) {
+    if (!$httpClient) {
+      $httpClient = \Drupal::httpClient();
+    }
+    $this->httpClient = $httpClient;
+    $this->useAuth = $useAuth;
   }
 
   /**
@@ -98,7 +94,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     $config = new EGIRConfig();
     $mo_url = $config->girUrl;
     $url = $mo_url . $path;
-    $auth_token = self::getOpenIdToken();
+    $auth_token = $this->getOpenIdToken();
 
     // Authenticate.
     $headers = [
@@ -107,7 +103,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     ];
 
     try {
-      $response = $this->httpClient()->request(
+      $response = $this->httpClient->request(
         'GET',
         $url,
         ['headers' => $headers]
@@ -121,7 +117,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
       return json_decode($response->getBody(), TRUE);
     }
     else {
-      self::formsLog()->notice('Call to URL' . $url . 'failed:' . $response->getBody());
+      $this->formsLog()->notice('Call to URL' . $url . 'failed:' . $response->getBody());
       return "";
     }
   }
@@ -134,7 +130,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     $config = new EGIRConfig();
     $url = $config->girUrl . $path;
     // Authentication headers.
-    $access_token = self::getOpenIdToken();
+    $access_token = $this->getOpenIdToken();
     $headers = [
       'Authorization' => 'Bearer ' . $access_token,
       'Accept' => 'application/json',
@@ -142,7 +138,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     ];
 
     try {
-      $response = $this->httpClient()->request(
+      $response = $this->httpClient->request(
         'POST',
         $url,
         ['body' => $data, 'headers' => $headers]
@@ -158,6 +154,9 @@ class GIRUtils implements ContainerFactoryPluginInterface {
    * Get OpenID authentication token from Keycloak.
    */
   public function getOpenIdToken() {
+    if (!$this->useAuth) {
+      return '';
+    }
     $keycloak_configuration = \Drupal::config('openid_connect.settings.keycloak');
 
     $keycloak_settings = $keycloak_configuration->get('settings');
@@ -173,7 +172,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     $payload['client_secret'] = $client_secret;
 
     // $json = json_encode($payload);
-    $response = $this->httpClient()->request(
+    $response = $this->httpClient->request(
       'POST',
       $token_url,
       ['form_params' => $payload]
@@ -199,7 +198,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
   public function getEmployees($org_unit_uuid) {
     $engagement_path = "/service/ou/{$org_unit_uuid}/details/engagement?validity=present";
 
-    $engagements = self::getJsonFromApi($engagement_path);
+    $engagements = $this->getJsonFromApi($engagement_path);
     $employees = [];
 
     foreach ($engagements as $engagement) {
@@ -214,7 +213,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
    */
   public function getExternals($org_unit_uuid) {
     $ea_path = "/api/v1/engagement_association?validity=present&org_unit={$org_unit_uuid}";
-    $engagement_associations = self::getJsonFromApi($ea_path);
+    $engagement_associations = $this->getJsonFromApi($ea_path);
 
     if (!$engagement_associations) {
       return [];
@@ -243,7 +242,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
     $today = date('Y-m-d');
     if ($details_json['engagement']) {
       $engagement_path = "{$details_path}engagement?at={$today}";
-      $engagement_json = self::getJsonFromApi($engagement_path);
+      $engagement_json = $this->getJsonFromApi($engagement_path);
       // @todo Later, handle multiple engagements.
       $engagement = reset($engagement_json);
     }
@@ -259,7 +258,7 @@ class GIRUtils implements ContainerFactoryPluginInterface {
       "/api/v1/engagement_association?engagement={$engagement_uuid}&at={$today}"
     );
 
-    $ea_json = self::getJsonFromApi($ea_path);
+    $ea_json = $this->getJsonFromApi($ea_path);
 
     if (!$ea_json) {
       return [];

@@ -21,7 +21,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
     
     protected function _before()
     {
-      $this->$utils = new GIRUTils();
+      $this->utils = new GIRUTils();
     }
 
     protected function _after()
@@ -30,7 +30,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
 
     // tests
     public function testFormsLog() {
-      $logger = $this->$utils->formsLog();
+      $logger = $this->utils->formsLog();
       $this->assertTrue(method_exists($logger, 'notice'));
       $this->assertTrue(method_exists($logger, 'error'));
 
@@ -46,7 +46,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
         $user->setUsername('user');
         $user->activate();
         $user->save();
-      $name = $this->$utils->getUserData($user->id(), 'name');
+      $name = $this->utils->getUserData($user->id(), 'name');
           $this->assertEquals($name, 'user');
 
           $user->delete();
@@ -58,7 +58,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $term = Term::create(['name' => 'egir_test', 'vid' => 'client']);
       $term->save();
 
-      $name = $this->$utils->getTermData($term->id(), 'name');
+      $name = $this->utils->getTermData($term->id(), 'name');
 
       $this->assertEquals($name, 'egir_test');
 
@@ -72,7 +72,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $term->save();
       $id = $term->id();
 
-      $storedId = $this->$utils->getTermIdByName('testid');
+      $storedId = $this->utils->getTermIdByName('testid');
 
       $this->assertEquals($id, $storedId);
 
@@ -93,7 +93,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       $user->field_uuid = $uuid;
       $user->save();
 
-      $stored_user_id = $this->$utils->getUserByGirUuid($uuid);
+      $stored_user_id = $this->utils->getUserByGirUuid($uuid);
 
       $this->assertEquals($stored_user_id, $user->id());
 
@@ -103,14 +103,16 @@ class GIRUtilsTest extends \Codeception\Test\Unit
     public function testGetJsonFromApi()
     {
       $body = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
-      $mock = new MockHandler([new Response(200, [], $body),]);
+      $mock = new MockHandler([
+        new Response(200, [], $body),
+      ]);
       $handler = HandlerStack::create($mock);
-      $this->mockHttp = new Client(['handler' => $handler]);
-      // $todo Mock the global HTTP client somehow.
-      // $response = GIRUtils::getJsonFromApi('/no/real/path');
-      $response = $body;
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp, false);
+      
+      $response = $utils->getJsonFromApi('/no/real/path');
 
-      $this->assertEquals($response, $body);
+      $this->assertEquals($response, json_decode($body, TRUE));
     }
 
 }
