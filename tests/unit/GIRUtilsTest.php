@@ -163,4 +163,15 @@ class GIRUtilsTest extends \Codeception\Test\Unit
       // @ todo Implement this.
       $this->assertEquals(0, 0);
     }
+
+    public function testGetEngagementAssociations()
+    {
+      $this->assertEquals(0, 0);
+    }
+
+    public function testGetMoveData()
+    {
+      $this->assertEquals(0, 0);
+    }
+
 }
