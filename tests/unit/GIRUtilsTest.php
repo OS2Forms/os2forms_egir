@@ -18,160 +18,160 @@ class GIRUtilsTest extends \Codeception\Test\Unit
    */
   protected $tester;
   protected $utils;
+    
+    protected function _before()
+    {
+      $this->utils = new GIRUtils();
+    }
 
-  protected function _before()
-  {
-    $this->utils = new GIRUTils();
-  }
+    protected function _after()
+    {
+    }
 
-  protected function _after()
-  {
-  }
+    // tests
+    public function testFormsLog() {
+      $logger = $this->utils->formsLog();
+      $this->assertTrue(method_exists($logger, 'notice'));
+      $this->assertTrue(method_exists($logger, 'error'));
 
-  // tests
-  public function testFormsLog() {
-    $logger = $this->utils->formsLog();
-    $this->assertTrue(method_exists($logger, 'notice'));
-    $this->assertTrue(method_exists($logger, 'error'));
+    }
+    public function testGetUserData()
+    {
+        $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+          
+        $user = \Drupal\user\Entity\User::create();
+        $user->enforceIsNew();
+        $user->setPassword('password');
+        $user->setEmail('egir@example.com');
+        $user->setUsername('user');
+        $user->activate();
+        $user->save();
+      $name = $this->utils->getUserData($user->id(), 'name');
+          $this->assertEquals($name, 'user');
 
-  }
-  public function testGetUserData()
-  {
-    $language = \Drupal::languageManager()->getCurrentLanguage()->getId();
+          $user->delete();
 
-    $user = \Drupal\user\Entity\User::create();
-    $user->enforceIsNew();
-    $user->setPassword('password');
-    $user->setEmail('egir@example.com');
-    $user->setUsername('user');
-    $user->activate();
-    $user->save();
-    $name = $this->utils->getUserData($user->id(), 'name');
-    $this->assertEquals($name, 'user');
+    }
 
-    $user->delete();
+    public function testGetTermData()
+    {
+      $term = Term::create(['name' => 'egir_test', 'vid' => 'client']);
+      $term->save();
 
-  }
+      $name = $this->utils->getTermData($term->id(), 'name');
 
-  public function testGetTermData()
-  {
-    $term = Term::create(['name' => 'egir_test', 'vid' => 'client']);
-    $term->save();
+      $this->assertEquals($name, 'egir_test');
 
-    $name = $this->utils->getTermData($term->id(), 'name');
+      $term->delete();
 
-    $this->assertEquals($name, 'egir_test');
+    }
 
-    $term->delete();
+    public function testGetTermIdByName()
+    {
+      $term = Term::create(['name' => 'testid', 'vid' => 'client']);
+      $term->save();
+      $id = $term->id();
 
-  }
+      $storedId = $this->utils->getTermIdByName('testid');
 
-  public function testGetTermIdByName()
-  {
-    $term = Term::create(['name' => 'testid', 'vid' => 'client']);
-    $term->save();
-    $id = $term->id();
+      $this->assertEquals($id, $storedId);
 
-    $storedId = $this->utils->getTermIdByName('testid');
+      $term->delete();
 
-    $this->assertEquals($id, $storedId);
+    }
 
-    $term->delete();
+    public function testGetUserByGirUuid()
+    {
+      $uuid = '598c225a-3728-11ec-a511-3341ab9aa960';
+      // Create new user.
+      $user = \Drupal\user\Entity\User::create();
+      $user->enforceIsNew();
+      $user->setPassword('password');
+      $user->setEmail('uid@example.com');
+      $user->setUsername('uid');
+      $user->activate();
+      $user->field_uuid = $uuid;
+      $user->save();
 
-  }
+      $stored_user_id = $this->utils->getUserByGirUuid($uuid);
 
-  public function testGetUserByGirUuid()
-  {
-    $uuid = '598c225a-3728-11ec-a511-3341ab9aa960';
-    // Create new user.
-    $user = \Drupal\user\Entity\User::create();
-    $user->enforceIsNew();
-    $user->setPassword('password');
-    $user->setEmail('uid@example.com');
-    $user->setUsername('uid');
-    $user->activate();
-    $user->field_uuid = $uuid;
-    $user->save();
+      $this->assertEquals($stored_user_id, $user->id());
 
-    $stored_user_id = $this->utils->getUserByGirUuid($uuid);
+      $user->delete();
+    }
 
-    $this->assertEquals($stored_user_id, $user->id());
+    public function testGetJsonFromApi()
+    {
+      $body = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
+      $mock = new MockHandler([
+        new Response(200, [], $body),
+      ]);
+      $handler = HandlerStack::create($mock);
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp, FALSE);
+      
+      $response = $utils->getJsonFromApi('/no/real/path');
 
-    $user->delete();
-  }
+      $this->assertEquals($response, json_decode($body, TRUE));
+    }
 
-  public function testGetJsonFromApi()
-  {
-    $body = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
-    $mock = new MockHandler([
-      new Response(200, [], $body),
-    ]);
-    $handler = HandlerStack::create($mock);
-    $mockHttp = new Client(['handler' => $handler]);
-    $utils = new GIRUtils($mockHttp, FALSE);
+    public function testPostJsonToApi()
+    {
+      $data = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
+      $mock = new MockHandler([
+        new Response(201, [], '{}'),
+      ]);
+      $handler = HandlerStack::create($mock);
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp, FALSE);
 
-    $response = $utils->getJsonFromApi('/no/real/path');
+      $response = $utils->postJsonToApi('/some/path/', $data);
 
-    $this->assertEquals($response, json_decode($body, TRUE));
-  }
+      $this->assertEquals(json_encode($response), '{}');
+    }
 
-  public function testPostJsonToApi()
-  {
-    $data = file_get_contents(__DIR__ . '/test_data/mo_create_org_func.json');
-    $mock = new MockHandler([
-      new Response(201, [], '{}'),
-    ]);
-    $handler = HandlerStack::create($mock);
-    $mockHttp = new Client(['handler' => $handler]);
-    $utils = new GIRUtils($mockHttp, FALSE);
+    public function testGetOpenIdToken()
+    {
+      $body = json_encode([ 'access_token' => 'xyz' ]);
+      $mock = new MockHandler([
+        new Response(200, [], $body),
+      ]);
+      $handler = HandlerStack::create($mock);
+      $mockHttp = new Client(['handler' => $handler]);
+      $utils = new GIRUtils($mockHttp);
 
-    $response = $utils->postJsonToApi('/some/path/', $data);
+      $token = $utils->getOpenIdToken();
 
-    $this->assertEquals(json_encode($response), '{}');
-  }
+      $this->assertEquals($token, 'xyz');
 
-  public function testGetOpenIdToken()
-  {
-    $body = json_encode([ 'access_token' => 'xyz' ]);
-    $mock = new MockHandler([
-      new Response(200, [], $body),
-    ]);
-    $handler = HandlerStack::create($mock);
-    $mockHttp = new Client(['handler' => $handler]);
-    $utils = new GIRUtils($mockHttp);
+    }
 
-    $token = $utils->getOpenIdToken();
+    public function testGetExternals()
+    {
+      // Get a functioning list of engagement associations somehow.
+      // Mock for the getJsonFromAPI call.
+      // Expect the correct externals to be extracted.
+      // @ todo Implement this.
+      $this->assertEquals(0, 0);
+    }
 
-    $this->assertEquals($token, 'xyz');
+    public function testGetEngagement()
+    {
+      // Supply list of details for the HTTP mock.
+      // Supply resulting engagement for the HTTP mock.
+      // Check the correct engagement is returned.
+      // @ todo Implement this.
+      $this->assertEquals(0, 0);
+    }
 
-  }
+    public function testGetEngagementAssociations()
+    {
+      $this->assertEquals(0, 0);
+    }
 
-  public function testGetExternals()
-  {
-    // Get a functioning list of engagement associations somehow.
-    // Mock for the getJsonFromAPI call.
-    // Expect the correct externals to be extracted.
-    // @ todo Implement this.
-    $this->assertEquals(0, 0);
-  }
-
-  public function testGetEngagement()
-  {
-    // Supply list of details for the HTTP mock.
-    // Supply resulting engagement for the HTTP mock.
-    // Check the correct engagement is returned.
-    // @ todo Implement this.
-    $this->assertEquals(0, 0);
-  }
-
-  public function testGetEngagementAssociations()
-  {
-    $this->assertEquals(0, 0);
-  }
-
-  public function testGetMoveData()
-  {
-    $this->assertEquals(0, 0);
-  }
+    public function testGetMoveData()
+    {
+      $this->assertEquals(0, 0);
+    }
 
 }
