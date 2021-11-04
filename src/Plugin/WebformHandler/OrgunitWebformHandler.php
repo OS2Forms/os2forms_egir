@@ -56,7 +56,7 @@ class OrgunitWebformHandler extends WebformHandlerBase {
         $external_options = [];
         foreach ($externals as $external) {
           // Get ID from GIR UUID.
-          $user = GIRUtils::getUserByGirUuid($external['uuid']);
+          $user = $utils->getUserByGirUuid($external['uuid']);
           $external_options[$user] = $external['name'];
         }
         $form['elements']['move_externals']['origin_and_destination_units']['externals']['#options'] = $external_options;

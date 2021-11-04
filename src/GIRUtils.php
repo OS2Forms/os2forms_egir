@@ -253,7 +253,7 @@ class GIRUtils {
   /**
    * Get move payloads for engagement associations from one org unit to another.
    */
-  public static function getMoveData($engagement_uuid, $old_ou_uuid, $new_ou_uuid) {
+  public function getMoveData($engagement_uuid, $old_ou_uuid, $new_ou_uuid) {
     $config = new EGIRConfig();
     $today = date('Y-m-d');
     // Array storing edit data payload.
