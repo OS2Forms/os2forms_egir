@@ -9,7 +9,7 @@ before_install:
 - echo "memory_limit=2G" >> ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/travis.ini
 
 install:
-- composer global require drush/drush:8.x-dev drupal/coder mglaman/drupal-check friendsoftwig/twigcs codeception/codeception codeception/module-asserts codeception/module-phpbrowser
+- composer global require drush/drush:8.x-dev drupal/coder mglaman/drupal-check friendsoftwig/twigcs codeception/codeception codeception/module-asserts codeception/module-phpbrowser droptica/codeception-drupal-bootstrap:dev-codeception codeception/module-db -W 
 - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
 - phpcs --config-set installed_paths ../../drupal/coder/coder_sniffer
 - phpenv rehash
@@ -38,6 +38,6 @@ script:
 - eslint $DRUPAL_ROOT/modules/contrib/os2forms_egir
 - stylelint --aei $DRUPAL_ROOT/modules/contrib/os2forms_egir/**/*.css
 - drupal-check $DRUPAL_ROOT/modules/contrib/os2forms_egir
-- cd $PROJECT_PATH
-- codecept run unit
+# - cd $PROJECT_PATH
+# - codecept run unit
 

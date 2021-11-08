@@ -34,12 +34,14 @@ class EmployeeWebformHandler extends WebformHandlerBase {
   ) {
 
     $values = $webform_submission->getData();
+    $utils = new GIRUtils();
+
     if (!array_key_exists('external_employee', $values)) {
       return;
     }
     $employee_id = $values['external_employee'];
 
-    $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
+    $uuid = $utils->getUserData($employee_id, 'field_uuid');
 
     if (!$uuid) {
       return;
@@ -47,18 +49,18 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     if ($form['#webform_id'] === 'move_external') {
       // Special handling of this form.
-      $engagement = GIRUtils::getEngagement($uuid);
+      $engagement = $utils->getEngagement($uuid);
       $org_units = [];
       $org_unit_options = [];
 
       if ($engagement) {
-        $engagement_associations = GIRUtils::getEngagementAssociations($engagement['uuid']);
+        $engagement_associations = $utils->getEngagementAssociations($engagement['uuid']);
 
         foreach ($engagement_associations as $ea) {
           if ($ea['engagement_association_type']['user_key'] === 'External') {
             // This is an org unit where the external is working.
             $org_unit_name = $ea['org_unit']['name'];
-            $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
+            $organizational_unit_id = $utils->getTermIdByName($org_unit_name);
             $org_units[] = $organizational_unit_id;
             $org_unit_options[$organizational_unit_id] = $org_unit_name;
           }
@@ -88,9 +90,11 @@ class EmployeeWebformHandler extends WebformHandlerBase {
 
     $values = $webform_submission->getData();
     $config = new EGIRConfig();
+    $utils = new GIRUtils();
+
     $employee_id = $values['external_employee'];
 
-    $uuid = GIRUtils::getUserData($employee_id, 'field_uuid');
+    $uuid = $utils->getUserData($employee_id, 'field_uuid');
 
     if (!$uuid) {
       // Not linked to any employee in GIR.
@@ -104,7 +108,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     // Now get all the right data from MO.
     $employee_path = '/service/e/' . $uuid . '/';
 
-    $employee_json = GIRUtils::getJsonFromApi($employee_path);
+    $employee_json = $utils->getJsonFromApi($employee_path);
 
     if (!$employee_json) {
       return;
@@ -115,7 +119,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     // Get details link and extract addresses etc.
     $details_path = $employee_path . 'details/';
 
-    $details_json = GIRUtils::getJsonFromApi($details_path);
+    $details_json = $utils->getJsonFromApi($details_path);
 
     if (!$details_json) {
       return;
@@ -129,7 +133,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $telephone_number = '';
     if ($details_json['address']) {
       $address_path = "{$details_path}address?at={$today}";
-      $address_json = GIRUtils::getJsonFromApi($address_path);
+      $address_json = $utils->getJsonFromApi($address_path);
 
       foreach ($address_json as $address) {
         if ($address['address_type']['name'] === 'Mobile') {
@@ -149,19 +153,19 @@ class EmployeeWebformHandler extends WebformHandlerBase {
     $cost_center_id = '';
     $organizational_unit_id = '';
     $consultant_type_id = '';
-    $engagement = GIRUtils::getEngagement($uuid);
+    $engagement = $utils->getEngagement($uuid);
     $org_units = [];
 
     if ($engagement) {
       $extra_uuids['engagement_uuid'] = $engagement['uuid'];
 
       $consultancy_name = $engagement['org_unit']['name'];
-      $consultancy_id = GIRUtils::getTermIdByName($consultancy_name);
+      $consultancy_id = $utils->getTermIdByName($consultancy_name);
       $consultant_type_name = $engagement['engagement_type']['name'];
-      $consultant_type_id = GIRUtils::getTermIdByName($consultant_type_name);
+      $consultant_type_id = $utils->getTermIdByName($consultant_type_name);
 
       // Now for the engagement associations.
-      $engagement_associations = GIRUtils::getEngagementAssociations($engagement['uuid']);
+      $engagement_associations = $utils->getEngagementAssociations($engagement['uuid']);
 
       foreach ($engagement_associations as $ea) {
         if ($ea['engagement_association_type']['user_key'] === 'Legal Company') {
@@ -172,7 +176,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
         ) {
           // This is the cost center.
           $cost_center_name = $ea['org_unit']['name'];
-          $cost_center_id = GIRUtils::getTermIdByName($cost_center_name);
+          $cost_center_id = $utils->getTermIdByName($cost_center_name);
           $extra_uuids['cost_center_ea_uuid'] = $ea['uuid'];
         }
         elseif (
@@ -180,7 +184,7 @@ class EmployeeWebformHandler extends WebformHandlerBase {
         ) {
           // This is an org unit where the external is working.
           $org_unit_name = $ea['org_unit']['name'];
-          $organizational_unit_id = GIRUtils::getTermIdByName($org_unit_name);
+          $organizational_unit_id = $utils->getTermIdByName($org_unit_name);
           $org_units[] = $organizational_unit_id;
         }
       }

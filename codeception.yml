@@ -4,7 +4,12 @@ paths:
     data: tests/_data
     support: tests/_support
     envs: tests/_envs
+settings:
+    lint: true
+    report_useless_tests: true
 actor_suffix: Tester
 extensions:
     enabled:
         - Codeception\Extension\RunFailed
+coverage:
+    enabled: true

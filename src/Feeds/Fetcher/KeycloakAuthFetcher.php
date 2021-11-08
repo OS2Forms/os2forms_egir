@@ -50,9 +50,11 @@ class KeycloakAuthFetcher extends HTTPFetcher {
     $sink = $this->fileSystem->tempnam('temporary://', 'feeds_http_fetcher');
     $sink = $this->fileSystem->realpath($sink);
 
+    $utils = new GIRUtils();
+
     $response = $this->get(
         $feed->getSource(), $sink,
-        $this->getCacheKey($feed), GIRUtils::getOpenIdToken()
+        $this->getCacheKey($feed), $utils->getOpenIdToken()
     );
     // @todo Handle redirects.
     // @codingStandardsIgnoreStart

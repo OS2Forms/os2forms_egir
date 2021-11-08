@@ -4,3 +4,6 @@
 # Ignore composer.lock & vendor/
 composer.lock
 vendor/
+
+# Ignore Vim swap files.
+*.swp
