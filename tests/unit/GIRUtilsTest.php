@@ -210,6 +210,8 @@ class GIRUtilsTest extends \Codeception\Test\Unit
 
     $moveData = $utils->getMoveData($some_uuid, $some_uuid, $some_uuid);
 
+    $today = date('Y-m-d');
+
     $expected_result = [
       [
         "type" => "engagement_association",
@@ -217,7 +219,7 @@ class GIRUtilsTest extends \Codeception\Test\Unit
         "data" => [
           "org_unit" => [
             "uuid" => "cb23626d-907c-650a-5a58-5640cb4f6ea9",],
-            "validity" => ["from" => "2021-11-04","to" => null]
+            "validity" => ["from" => "$today","to" => null]
         ]
       ]
     ];
