@@ -16,7 +16,7 @@
     }
   },
   "require": {
-    "os2forms/os2forms_forloeb": "^1.7.0",
+    "os2forms/os2forms_forloeb": "^2.0",
     "drupal/feeds_ex": "^1.0@alpha",
     "drupal/keycloak": "^1.5",
     "zaporylie/composer-drupal-optimizations": "1.2.0",
