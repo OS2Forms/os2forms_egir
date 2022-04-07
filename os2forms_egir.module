@@ -252,44 +252,53 @@ function os2forms_egir_gir_change_external($processID, $queueID) {
   ];
 
   // Address edit details.
-  $phone_edit = [
-    'type' => 'address',
-    'uuid' => $extra_uuids['phone_addr_uuid'],
-    'data' => [
-      'value' => $phone,
-      'address_type' => ['uuid' => $config->extPhoneType],
-      'validity' => $validity,
-    ],
-  ];
-  $email_edit = [
-    'type' => 'address',
-    'uuid' => $extra_uuids['email_addr_uuid'],
-    'data' => [
-      'value' => $email,
-      'address_type' => ['uuid' => $config->extEmailType],
-      'validity' => $validity,
-    ],
-  ];
+  if($phone) {
+    $phone_edit = [
+      'type' => 'address',
+      'uuid' => $extra_uuids['phone_addr_uuid'],
+      'data' => [
+        'value' => $phone,
+        'address_type' => ['uuid' => $config->extPhoneType],
+        'validity' => $validity,
+      ],
+    ];
+  }
 
+  if($email) {  
+    $email_edit = [
+      'type' => 'address',
+      'uuid' => $extra_uuids['email_addr_uuid'],
+      'data' => [
+        'value' => $email,
+        'address_type' => ['uuid' => $config->extEmailType],
+        'validity' => $validity,
+      ],
+    ];
+  }
+  
   // Employment edit details.
-  $consultancy_uuid = $utils->getTermData($consultancy_id, 'field_uuid');
-  $consultant_type_uuid = $utils->getTermData($consultant_type_id, 'field_uuid');
-  $engagement_edit = [
-    'type' => 'engagement',
-    'uuid' => $extra_uuids['engagement_uuid'],
-    'data' => [
-      'org_unit' => ['uuid' => $consultancy_uuid],
-      'engagement_type' => ['uuid' => $consultant_type_uuid],
-      'validity' => $validity,
-    ],
-  ];
+  if($consultancy_id && $consultant_type_id_type) {
+    $consultancy_uuid = $utils->getTermData($consultancy_id, 'field_uuid');
+    $consultant_type_uuid = $utils->getTermData($consultant_type_id, 'field_uuid');
+    $engagement_edit = [
+      'type' => 'engagement',
+      'uuid' => $extra_uuids['engagement_uuid'],
+      'data' => [
+        'org_unit' => ['uuid' => $consultancy_uuid],
+        'engagement_type' => ['uuid' => $consultant_type_uuid],
+        'validity' => $validity,
+      ],
+    ];
+  }
 
-  $edit_data = [
+  // Filter out null-values with array_filter()
+  $edit_data = array_filter([
     $empl_edit,
     $phone_edit,
     $email_edit,
     $engagement_edit,
-  ];
+  ]);
+
   $json_data = json_encode($edit_data);
   $utils->formsLog()->notice('Edit data sent:' . var_export($json_data, TRUE));
 
@@ -776,6 +785,6 @@ function os2forms_egir_spv_fetch_entity_username($uniqueWebformIdentifier, $webf
     return $returnValue;
   }
   $account = User::load($returnValue);
-  $username = $account->getUsername();
+  $username = $account->getAccountName();
   return $username;
 }
