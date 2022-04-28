@@ -776,6 +776,6 @@ function os2forms_egir_spv_fetch_entity_username($uniqueWebformIdentifier, $webf
     return $returnValue;
   }
   $account = User::load($returnValue);
-  $username = $account->getUsername();
+  $username = $account->getAccountName();
   return $username;
 }
